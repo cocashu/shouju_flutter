@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
+import 'package:hy_shouju/main.dart';
 import 'package:hy_shouju/models/invoice.dart';
+import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'dart:io';
@@ -8,9 +10,11 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:printing/printing.dart';
 import 'package:hy_shouju/pages/pdfexport/pdf/zifuchuan_utils.dart';
 import 'package:hy_shouju/numbertochinese.dart';
+import 'package:get/get.dart';
 
 Future<Uint8List> makePdf(Invoice invoice) async {
   final pdf = Document();
+  final Controller c = Get.put(Controller());
   final imageLogo = MemoryImage(
       (await rootBundle.load('assets/logo.png')).buffer.asUint8List());
   final ttf =
@@ -34,7 +38,8 @@ Future<Uint8List> makePdf(Invoice invoice) async {
                       "    收    据   ",
                       style: TextStyle(font: ttf, fontSize: 30),
                     ),
-                    Text('                ${invoice.fksj}',
+                    Text(
+                        '                ${DateFormat('yyyy年MM月dd日').format(DateTime.parse(invoice.fksj))}',
                         style: TextStyle(font: ttf, fontSize: 10)),
                   ],
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,7 +59,7 @@ Future<Uint8List> makePdf(Invoice invoice) async {
                       runSpacing: 8.0, // 子小部件之间的垂直间距
                       children: <Widget>[
                         Text(
-                          '加密区:这是一段较长的文本这是一段较长的文本这是一段较长的文本这是一段较长的文本这是一段较长的文本这是 :${invoice.sjhm}',
+                          '加密区:${invoice.fksj}+${invoice.fklx}+${invoice.fkje} \n${invoice.sjhm}',
                           style: TextStyle(font: ttf, fontSize: 7),
                         ),
 
@@ -102,7 +107,7 @@ Future<Uint8List> makePdf(Invoice invoice) async {
                   borderStyle: BorderStyle.dashed,
                 ),
                 SizedBox(
-                  height: 5,
+                  height: 10,
                 ),
                 Row(children: [
                   Text(
@@ -124,7 +129,7 @@ Future<Uint8List> makePdf(Invoice invoice) async {
                   borderStyle: BorderStyle.dashed,
                 ),
                 SizedBox(
-                  height: 5,
+                  height: 10,
                 ),
                 Row(children: [
                   Text(
@@ -152,7 +157,7 @@ Future<Uint8List> makePdf(Invoice invoice) async {
                 ),
                 Row(children: [
                   Text(
-                    ' 单位盖章：霍林郭勒市鸿宇商贸有限责任公司',
+                    ' 单位盖章：${c.gsinameall}',
                     style: TextStyle(font: ttf, fontSize: 10),
                   ),
                 ]),
@@ -171,32 +176,29 @@ Future<Uint8List> makePdf(Invoice invoice) async {
               ]),
             ),
             Row(children: [
-              SizedBox(
-                width: 30,
-              ),
               Text(
-                ' 负责人',
+                ' 负责人:',
                 style: TextStyle(font: ttf, fontSize: 10),
               ),
               SizedBox(
                 width: 100,
               ),
               Text(
-                ' 会计',
+                ' 会计:',
                 style: TextStyle(font: ttf, fontSize: 10),
               ),
               SizedBox(
                 width: 100,
               ),
               Text(
-                ' 出纳',
+                ' 出纳:${c.username}',
                 style: TextStyle(font: ttf, fontSize: 10),
               ),
               SizedBox(
                 width: 100,
               ),
               Text(
-                ' 记账',
+                ' 记账:',
                 style: TextStyle(font: ttf, fontSize: 10),
               ),
             ]),

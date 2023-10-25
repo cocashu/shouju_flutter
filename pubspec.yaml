@@ -37,7 +37,7 @@ dependencies:
   intl: ^0.18.1
   dropdown_textfield: ^1.0.8
   printing: ^5.11.0
-  # pdf: ^3.10.4
+  get: ^4.6.6
 
 dev_dependencies:
   flutter_test:

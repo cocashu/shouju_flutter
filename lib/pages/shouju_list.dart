@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hy_shouju/models/invoice.dart';
-import 'package:hy_shouju/pages/detail.dart';
 import 'package:hy_shouju/pages/pdfexport/pdfpreview.dart';
 
 class InvoicePage extends StatelessWidget {

@@ -7,16 +7,24 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import './pages/shouju_list.dart';
 import 'package:hy_shouju/pages/pdfexport/pdfpreview.dart';
 import 'package:hy_shouju/models/invoice.dart';
+import 'package:get/get.dart';
 
-void main() => runApp(RunMyApp());
+// void main() => runApp(RunMyApp());
+void main() => runApp(GetMaterialApp(home: RunMyApp()));
+
+class Controller extends GetxController {
+  var username = 'jie'.obs; //出纳
+  var gsiname = '鸿宇商贸'.obs; //公司简称
+  var gsinameall = '霍林郭勒市鸿宇商贸有限责任公司'.obs; //公司全称
+}
 
 class RunMyApp extends StatelessWidget {
   late final Invoice invoice;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(context) {
     return const MaterialApp(
-      title: '鸿宇集团【分公司名字】收费专用',
+      // title: '鸿宇集团【分公司名字】收费专用',
       debugShowCheckedModeBanner: false,
       home: MyCustomForm(),
       //本地化
@@ -42,13 +50,21 @@ class MyCustomForm extends StatefulWidget {
 }
 
 class _MyCustomFormState extends State<MyCustomForm> {
-  final TextEditingController myController = TextEditingController();
+  final TextEditingController _jine = TextEditingController();
   String displayText = '';
-  late SingleValueDropDownController _cnt;
+  late SingleValueDropDownController _fklx;
+  late SingleValueDropDownController _fkfs;
 
+  final TextEditingController _sjhm = TextEditingController();
+  final TextEditingController _fkdw = TextEditingController();
+  final TextEditingController _fkzy = TextEditingController();
+
+  late Invoice invoice;
+  final Controller c = Get.put(Controller());
   @override
   void initState() {
-    _cnt = SingleValueDropDownController();
+    _fklx = SingleValueDropDownController();
+    _fkfs = SingleValueDropDownController();
 
     super.initState();
   }
@@ -56,33 +72,33 @@ class _MyCustomFormState extends State<MyCustomForm> {
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
-    myController.dispose();
-    _cnt.dispose();
+    _jine.dispose();
+    _fklx.dispose();
+    _fkfs.dispose();
     super.dispose();
   }
 
+  selectChange(value) {
+    print("值改变了：$value");
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(context) {
     final String currentDate =
         DateFormat('yyyy年MM月dd日').format(DateTime.now()).toUpperCase();
     final Size size = MediaQuery.of(context).size;
     final double width = size.width;
     final double height = size.height;
-    final invoice = Invoice(
-        fkdw: '打印测试',
-        fkzy: '房屋租金2020年10月1日至2022年10月1 日',
-        fklx: '房屋租金',
-        fkje: 999999999.99,
-        fksj: currentDate,
-        zffs: '支付宝',
-        sjhm: '1234567890');
+    // 使用Get.put()实例化你的类，使其对当下的所有子路由可用。
 
     return Scaffold(
+      // appBar: AppBar(
+      //   title: const Center(
+      //     child: Text('鸿宇集团【${c.gsiname}】收费专用'),
+      //   ),
+      // ),
       appBar: AppBar(
-        title: const Center(
-          child: Text('鸿宇集团【分公司名字】收费专用'),
-        ),
-      ),
+          title: Obx(() => Center(child: Text("鸿宇集团【 ${c.gsiname}】收费专用")))),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
@@ -104,8 +120,9 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 ),
                 SizedBox(
                   width: width * 0.4 - 30,
-                  child: const TextField(
-                    decoration: InputDecoration(
+                  child: TextField(
+                    controller: _sjhm,
+                    decoration: const InputDecoration(
                       hintText: '收据编号',
                       border: OutlineInputBorder(),
                     ),
@@ -133,8 +150,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 width: width - 190,
                 margin: const EdgeInsets.symmetric(vertical: 10),
                 child: DropDownTextField(
-                  controller: _cnt,
-                  // textFieldDecoration: '',
+                  controller: _fklx,
                   clearOption: true, //是否有清除按钮
                   enableSearch: true, //是否过过滤
                   clearIconProperty: IconProperty(color: Colors.green),
@@ -151,7 +167,9 @@ class _MyCustomFormState extends State<MyCustomForm> {
                     DropDownValueModel(name: '保证金', value: "value8"),
                   ],
                   onChanged: (val) {
-                    // selectChange(val.value.toString());
+                    selectChange(val.name.toString());
+                    _sjhm.text = val.value.toString();
+                    // print(_fklx.dropDownValue!.name.toString());
                   },
                 ),
               ),
@@ -176,8 +194,9 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 const SizedBox(width: 10),
                 SizedBox(
                   width: width - 190,
-                  child: const TextField(
-                    decoration: InputDecoration(
+                  child: TextField(
+                    controller: _fkdw,
+                    decoration: const InputDecoration(
                       hintText: '',
                       border: OutlineInputBorder(),
                     ),
@@ -206,8 +225,9 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 const SizedBox(width: 10),
                 SizedBox(
                   width: width - 190,
-                  child: const TextField(
-                    decoration: InputDecoration(
+                  child: TextField(
+                    controller: _fkzy,
+                    decoration: const InputDecoration(
                       hintText: '',
                       border: OutlineInputBorder(),
                     ),
@@ -236,7 +256,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 SizedBox(
                   width: width - 190,
                   child: TextField(
-                    controller: myController,
+                    controller: _jine,
                     decoration: const InputDecoration(
                       hintText: '',
                       border: OutlineInputBorder(),
@@ -274,7 +294,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 width: width - 190,
                 margin: const EdgeInsets.symmetric(vertical: 10),
                 child: DropDownTextField(
-                  controller: _cnt,
+                  controller: _fkfs,
                   // textFieldDecoration: '',
                   clearOption: true, //是否有清除按钮
                   enableSearch: false, //是否过过滤
@@ -284,8 +304,8 @@ class _MyCustomFormState extends State<MyCustomForm> {
                   dropDownList: const [
                     DropDownValueModel(name: '微信支付', value: "wxpay"),
                     DropDownValueModel(name: '支付宝', value: "alipay"),
-                    DropDownValueModel(name: '银行卡', value: "value3"),
-                    DropDownValueModel(name: '现金', value: "value4"),
+                    DropDownValueModel(name: '银行卡', value: "unpay"),
+                    DropDownValueModel(name: '现金', value: "xianjin"),
                     // DropDownValueModel(name: 'name5', value: "value5"),
                     // DropDownValueModel(name: 'name6', value: "value6"),
                     // DropDownValueModel(name: 'name7', value: "value7"),
@@ -368,12 +388,49 @@ class _MyCustomFormState extends State<MyCustomForm> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    PdfPreviewPage(invoice: invoice)), // 导航到 PrintPage
-          );
+          if (_fkdw.text.isNotEmpty == true &&
+              _fkzy.text.isNotEmpty == true &&
+              _fklx.dropDownValue != null &&
+              _jine.text != null &&
+              double.tryParse(_jine.text)! > 0.00 &&
+              _fkfs.dropDownValue != null) {
+            print(_fkdw.text + '此处可以增加保存数据的过程');
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PdfPreviewPage(
+                  invoice: Invoice(
+                    fkdw: _fkdw.text,
+                    fkzy: _fkzy.text,
+                    fklx: _fklx.dropDownValue!.name.toString(),
+                    fkje: double.parse(_jine.text) ?? 0,
+                    fksj: DateTime.now().toString(),
+                    zffs: _fkfs.dropDownValue!.name.toString(),
+                    sjhm: _sjhm.text,
+                  ),
+                ),
+              ),
+            );
+          } else {
+            // 处理变量为空的情况
+            // 或者显示错误提示
+            if (_fklx.dropDownValue == null) {
+              print('付款类型未选择');
+            }
+            if (_fkdw.text?.isNotEmpty != true) {
+              print('付款单位未填写');
+            }
+            if (_fkzy.text?.isNotEmpty != true) {
+              print('付款摘要未填写');
+            }
+            if (_fkfs.dropDownValue == null) {
+              print('付款方式未选择');
+            }
+            if (_jine.text?.isNotEmpty != true ||
+                double.tryParse(_jine.text)! <= 0.00) {
+              print('金额填写错误');
+            }
+          }
         },
         // tooltip: '打印按钮',
         child: const Icon(Icons.print),

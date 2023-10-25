@@ -6,6 +6,7 @@ class Invoice {
   final String fksj;
   final String zffs;
   final String sjhm;
+
   Invoice({
     required this.fkdw,
     required this.fkzy,
