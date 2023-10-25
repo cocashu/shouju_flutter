@@ -14,8 +14,8 @@ void main() => runApp(GetMaterialApp(home: RunMyApp()));
 
 class Controller extends GetxController {
   var username = 'jie'.obs; //出纳
-  var gsiname = '鸿宇商贸'.obs; //公司简称
-  var gsinameall = '霍林郭勒市鸿宇商贸有限责任公司'.obs; //公司全称
+  var gsiname = 'HY商贸'.obs; //公司简称
+  var gsinameall = 'ABCD市HY商贸有限责任公司'.obs; //公司全称
 }
 
 class RunMyApp extends StatelessWidget {
