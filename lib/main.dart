@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'numbertochinese.dart';
 import 'package:intl/intl.dart';
 import 'package:dropdown_textfield/dropdown_textfield.dart';
@@ -8,9 +9,66 @@ import './pages/shouju_list.dart';
 import 'package:hy_shouju/pages/pdfexport/pdfpreview.dart';
 import 'package:hy_shouju/models/invoice.dart';
 import 'package:get/get.dart';
+import './pages/leixing_page.dart';
+import 'package:path/path.dart';
 
-// void main() => runApp(RunMyApp());
-void main() => runApp(GetMaterialApp(home: RunMyApp()));
+// void main() => runApp(GetMaterialApp(home: RunMyApp()));//s
+void main() async {
+  sqfliteFfiInit();
+  WidgetsFlutterBinding.ensureInitialized();
+  databaseFactory = databaseFactoryFfi;
+  var databasesPath = await getDatabasesPath();
+  var databasePath = join(databasesPath, 'my_database.db');
+  var database = await openDatabase(databasePath, version: 1,
+      onCreate: (db, version) async {
+    // 创建 "jflx" 表
+    await db.execute('''
+        CREATE TABLE jflx (
+        id INTEGER PRIMARY KEY,
+        jflx TEXT,
+        zhangtao TEXT
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE zffs (
+        id INTEGER PRIMARY KEY,
+        zffs TEXT,
+        zhangtao TEXT
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE user (
+        id INTEGER PRIMARY KEY,
+        username TEXT,
+        password TEXT,
+        zhangtao TEXT
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE zt (
+        id INTEGER PRIMARY KEY,
+        zhangtao TEXT,
+        gsname TEXT
+      )
+    ''');
+    // 创建 "缴费明细" 表
+    await db.execute('''
+      CREATE TABLE fkmx (
+        id INTEGER PRIMARY KEY,
+        jflx_id int,
+        zffs_id int,
+        user_id int,
+        jine REAL,
+        zf_jine REAL,
+        uptime DATETIME,
+        zhangtao_id int
+      )
+    ''');
+  });
+
+  runApp(GetMaterialApp(home: RunMyApp()));
+}
 
 class Controller extends GetxController {
   var username = 'jie'.obs; //出纳
@@ -366,6 +424,17 @@ class _MyCustomFormState extends State<MyCustomForm> {
                     // 按钮的点击事件处理逻辑InvoicePage
                   },
                   child: const Text('保存'),
+                ),
+              ),
+              SizedBox(
+                width: 100,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // 按钮的点击事件处理逻辑InvoicePage
+                    Get.to(TypeManagementPage());
+                  },
+                  child: const Text('类型管理'),
                 ),
               ),
               SizedBox(

@@ -38,6 +38,8 @@ dependencies:
   dropdown_textfield: ^1.0.8
   printing: ^5.11.0
   get: ^4.6.6
+  sqflite_common_ffi: ^2.3.0+2
+  path: ^1.8.3
 
 dev_dependencies:
   flutter_test:
