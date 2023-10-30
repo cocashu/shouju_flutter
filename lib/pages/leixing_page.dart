@@ -11,6 +11,7 @@ class Type {
 }
 
 class TypeManagementPage extends StatefulWidget {
+  const TypeManagementPage({Key? key}) : super(key: key); //嵌套模式
   @override
   _TypeManagementPageState createState() => _TypeManagementPageState();
 }
@@ -18,11 +19,7 @@ class TypeManagementPage extends StatefulWidget {
 class _TypeManagementPageState extends State<TypeManagementPage> {
   final Controller c = Get.put(Controller());
   final TextEditingController _jiaofeileixing = TextEditingController();
-  List<Type> types = [
-    Type('类型1', '这是类型1的描述'),
-    Type('类型2', '这是类型2的描述'),
-    Type('类型3', '这是类型3的描述'),
-  ];
+
   List<Map<String, dynamic>> dataList = [];
   Future<Database> openDatabaseConnection() async {
     String databasePath = await getDatabasesPath();
@@ -196,9 +193,9 @@ class _TypeManagementPageState extends State<TypeManagementPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('类型管理'),
-      ),
+      // appBar: AppBar(
+      //   title: const Text('类型管理'),
+      // ),
       body: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.max,
