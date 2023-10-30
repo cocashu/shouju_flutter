@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hy_shouju/pages/zhifu_page.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'numbertochinese.dart';
 import 'package:intl/intl.dart';
@@ -11,6 +12,8 @@ import 'package:hy_shouju/models/invoice.dart';
 import 'package:get/get.dart';
 import './pages/leixing_page.dart';
 import 'package:path/path.dart';
+// import './pages/ment_data.dart';
+// import './pages/leixing_page.dart';
 
 // void main() => runApp(GetMaterialApp(home: RunMyApp()));//s
 void main() async {
@@ -116,15 +119,59 @@ class _MyCustomFormState extends State<MyCustomForm> {
   final TextEditingController _sjhm = TextEditingController();
   final TextEditingController _fkdw = TextEditingController();
   final TextEditingController _fkzy = TextEditingController();
-
+  Future<List<DropDownValueModel>>? _jflx_loadDataFuture;
+  Future<List<DropDownValueModel>>? _zffs_loadDataFuture;
   late Invoice invoice;
   final Controller c = Get.put(Controller());
   @override
   void initState() {
     _fklx = SingleValueDropDownController();
     _fkfs = SingleValueDropDownController();
-
+    _jflx_loadDataFuture = jflx_loadData();
+    _zffs_loadDataFuture = jflx_loadData();
     super.initState();
+  }
+
+  Future<Database> openDatabaseConnection() async {
+    String databasePath = await getDatabasesPath();
+    String databaseFile = join(databasePath, 'my_database.db');
+    return openDatabase(databaseFile);
+  }
+
+// 加载缴费类型
+  Future<List<DropDownValueModel>> jflx_loadData() async {
+    Database database = await openDatabaseConnection();
+    String tableName = "jflx";
+
+    List<Map<String, dynamic>> result = await database.query(tableName);
+
+    List<DropDownValueModel> dataList = result.map((row) {
+      String name = row['jflx'];
+      String value = row['id'].toString();
+      return DropDownValueModel(name: name, value: value);
+    }).toList();
+    // print(dataList.toString());
+    await database.close();
+
+    return dataList;
+  }
+
+// 加载支付当时
+  Future<List<DropDownValueModel>> zffs_loadData() async {
+    Database database = await openDatabaseConnection();
+    String tableName = "zffs";
+
+    List<Map<String, dynamic>> result = await database.query(tableName);
+
+    List<DropDownValueModel> dataList = result.map((row) {
+      String name = row['zffs'];
+      String value = row['id'].toString();
+      return DropDownValueModel(name: name, value: value);
+    }).toList();
+    // print(dataList.toString());
+    await database.close();
+
+    return dataList;
   }
 
   @override
@@ -207,27 +254,32 @@ class _MyCustomFormState extends State<MyCustomForm> {
               Container(
                 width: width - 190,
                 margin: const EdgeInsets.symmetric(vertical: 10),
-                child: DropDownTextField(
-                  controller: _fklx,
-                  clearOption: true, //是否有清除按钮
-                  enableSearch: true, //是否过过滤
-                  clearIconProperty: IconProperty(color: Colors.green),
-                  searchDecoration: const InputDecoration(hintText: "在这输入过滤文字"),
-                  dropDownItemCount: 6, //显示多少过滤选项
-                  dropDownList: const [
-                    DropDownValueModel(name: '安装费', value: "value1"),
-                    DropDownValueModel(name: '装修保证金', value: "cocashu"),
-                    DropDownValueModel(name: '微信支付手续费', value: "value3"),
-                    DropDownValueModel(name: '租金', value: "value4"),
-                    DropDownValueModel(name: '储值卡', value: "value5"),
-                    DropDownValueModel(name: '管理服务费', value: "value6"),
-                    DropDownValueModel(name: '物业费', value: "value7"),
-                    DropDownValueModel(name: '保证金', value: "value8"),
-                  ],
-                  onChanged: (val) {
-                    selectChange(val.name.toString());
-                    _sjhm.text = val.value.toString();
-                    // print(_fklx.dropDownValue!.name.toString());
+                child: FutureBuilder<List<DropDownValueModel>>(
+                  future: _jflx_loadDataFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator(); // 显示加载指示器
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}'); // 显示错误信息
+                    } else if (snapshot.hasData) {
+                      List<DropDownValueModel> dataList = snapshot.data!;
+                      return DropDownTextField(
+                        controller: _fklx,
+                        clearOption: true,
+                        enableSearch: true,
+                        clearIconProperty: IconProperty(color: Colors.green),
+                        searchDecoration:
+                            const InputDecoration(hintText: "在这输入过滤文字"),
+                        dropDownItemCount: 6,
+                        dropDownList: dataList,
+                        onChanged: (val) {
+                          _sjhm.text = val.value.toString();
+                          //需要查询当前类型下面有多少数据
+                        },
+                      );
+                    } else {
+                      return const Text('没有可用选项，请先管理选项'); // 没有数据时显示消息
+                    }
                   },
                 ),
               ),
@@ -351,26 +403,32 @@ class _MyCustomFormState extends State<MyCustomForm> {
               Container(
                 width: width - 190,
                 margin: const EdgeInsets.symmetric(vertical: 10),
-                child: DropDownTextField(
-                  controller: _fkfs,
-                  // textFieldDecoration: '',
-                  clearOption: true, //是否有清除按钮
-                  enableSearch: false, //是否过过滤
-                  clearIconProperty: IconProperty(color: Colors.green),
-                  searchDecoration: const InputDecoration(hintText: "在这输入过滤文字"),
-                  dropDownItemCount: 6, //显示多少过滤选项
-                  dropDownList: const [
-                    DropDownValueModel(name: '微信支付', value: "wxpay"),
-                    DropDownValueModel(name: '支付宝', value: "alipay"),
-                    DropDownValueModel(name: '银行卡', value: "unpay"),
-                    DropDownValueModel(name: '现金', value: "xianjin"),
-                    // DropDownValueModel(name: 'name5', value: "value5"),
-                    // DropDownValueModel(name: 'name6', value: "value6"),
-                    // DropDownValueModel(name: 'name7', value: "value7"),
-                    // DropDownValueModel(name: 'name8', value: "value8"),
-                  ],
-                  onChanged: (val) {
-                    // selectChange(val.value.toString());
+                child: FutureBuilder<List<DropDownValueModel>>(
+                  future: _zffs_loadDataFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator(); // 显示加载指示器
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}'); // 显示错误信息
+                    } else if (snapshot.hasData) {
+                      List<DropDownValueModel> zffs_dataList = snapshot.data!;
+                      return DropDownTextField(
+                        controller: _fklx,
+                        clearOption: true,
+                        enableSearch: true,
+                        clearIconProperty: IconProperty(color: Colors.green),
+                        searchDecoration:
+                            const InputDecoration(hintText: "在这输入过滤文字"),
+                        dropDownItemCount: 6,
+                        dropDownList: zffs_dataList,
+                        onChanged: (val) {
+                          // _sjhm.text = val.value.toString();
+                          //需要查询当前类型下面有多少数据
+                        },
+                      );
+                    } else {
+                      return const Text('没有可用选项，请先管理选项'); // 没有数据时显示消息
+                    }
                   },
                 ),
               ),
@@ -435,6 +493,17 @@ class _MyCustomFormState extends State<MyCustomForm> {
                     Get.to(TypeManagementPage());
                   },
                   child: const Text('类型管理'),
+                ),
+              ),
+              SizedBox(
+                width: 100,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // 按钮的点击事件处理逻辑InvoicePage
+                    Get.to(zffs_TypeManagementPage());
+                  },
+                  child: const Text('支付管理'),
                 ),
               ),
               SizedBox(
