@@ -3,36 +3,39 @@ import 'package:hy_shouju/main.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
-class Type {
-  final String name;
-  final String description;
-  Type(this.name, this.description);
-}
-
-class zffs_TypeManagementPage extends StatefulWidget {
-  const zffs_TypeManagementPage({Key? key}) : super(key: key); //嵌套模式
+class user_TypeManagementPage extends StatefulWidget {
+  const user_TypeManagementPage({Key? key}) : super(key: key); //嵌套模式
   @override
   _TypeManagementPageState createState() => _TypeManagementPageState();
 }
 
-class _TypeManagementPageState extends State<zffs_TypeManagementPage> {
+class _TypeManagementPageState extends State<user_TypeManagementPage> {
   final Controller c = Get.put(Controller());
-  final TextEditingController _zhifuleixing = TextEditingController();
+  final TextEditingController _username = TextEditingController();
 
-  List<Map<String, dynamic>> zffs_dataList = [];
+  List<Map<String, dynamic>> user_dataList = [];
   Future<Database> openDatabaseConnection() async {
     String databasePath = await getDatabasesPath();
     String databaseFile = join(databasePath, 'my_database.db');
     return openDatabase(databaseFile);
   }
 
+  String generateMd5(String input) {
+    var bytes = utf8.encode(input); // 将字符串转换为字节数组
+    var digest = md5.convert(bytes); // 进行MD5加密
+    return digest.toString(); // 将加密结果转换为字符串
+  }
+
 //插入数据
-  Future<void> insertData(String jflx, String zhangtao) async {
+  Future<void> insertData(String username, String zhangtao) async {
     Database database = await openDatabaseConnection();
-    String tableName = "zffs";
+    String tableName = "user";
     Map<String, dynamic> data = {
-      "zffs": jflx,
+      "username": username,
+      "password": generateMd5(username),
       "zhangtao": zhangtao,
     };
     await database.insert(tableName, data);
@@ -46,8 +49,7 @@ class _TypeManagementPageState extends State<zffs_TypeManagementPage> {
   // 删除数据
   Future<void> deleteData(int id) async {
     Database database = await openDatabaseConnection();
-    String tableName = "zffs";
-
+    String tableName = "user";
     await database.delete(
       tableName,
       where: 'id = ?',
@@ -60,14 +62,13 @@ class _TypeManagementPageState extends State<zffs_TypeManagementPage> {
     await database.close();
   }
 
-  Future<void> updatezffs(int id, BuildContext context) async {
+  Future<void> updateuser(int id, BuildContext context) async {
     TextEditingController textEditingController = TextEditingController();
-
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('修改支付方式'),
+          title: const Text('修改密码'),
           content: TextField(
             controller: textEditingController,
           ),
@@ -81,8 +82,8 @@ class _TypeManagementPageState extends State<zffs_TypeManagementPage> {
             TextButton(
               child: const Text('确认'),
               onPressed: () async {
-                String newJflx = textEditingController.text;
-                await performUpdate(id, newJflx);
+                String newpass = textEditingController.text;
+                await performUpdate(id, newpass);
                 Navigator.of(context).pop();
               },
             ),
@@ -93,16 +94,15 @@ class _TypeManagementPageState extends State<zffs_TypeManagementPage> {
   }
 
   // 修改数据
-  Future<void> performUpdate(int id, String newJflx) async {
+  Future<void> performUpdate(int id, String newpass) async {
     // 在这里执行实际的更新操作
     // 使用传入的id和newJflx参数更新数据库中的数据
     Database database = await openDatabaseConnection();
-    String tableName = "zffs";
+    String tableName = "user";
 
     Map<String, dynamic> updatedData = {
-      "zffs": newJflx,
+      "password": generateMd5(newpass),
     };
-
     await database.update(
       tableName,
       updatedData,
@@ -119,10 +119,10 @@ class _TypeManagementPageState extends State<zffs_TypeManagementPage> {
 // 刷新数据
   Future<void> fetchData() async {
     Database database = await openDatabaseConnection();
-    String tableName = "zffs";
+    String tableName = "user";
     List<Map<String, dynamic>> result = await database.query(tableName);
     setState(() {
-      zffs_dataList = result;
+      user_dataList = result;
     });
     await database.close();
   }
@@ -142,7 +142,7 @@ class _TypeManagementPageState extends State<zffs_TypeManagementPage> {
                 onTap: () {
                   // 处理修改操作
                   print('修改' + index.toString());
-                  updatezffs(index, itemContext);
+                  updateuser(index, itemContext);
                   Navigator.pop(context); // 关闭弹出菜单
                 },
               ),
@@ -191,14 +191,14 @@ class _TypeManagementPageState extends State<zffs_TypeManagementPage> {
                   child: Column(
                     children: [
                       const Text(
-                        '增加支付方式',
+                        '增加用户',
                         style: TextStyle(fontSize: 16),
                       ),
                       const SizedBox(height: 10),
                       SizedBox(
                         width: leftWidth,
                         child: TextField(
-                          controller: _zhifuleixing,
+                          controller: _username,
                           decoration: const InputDecoration(
                             // hintText: '文本框',
                             border: OutlineInputBorder(),
@@ -208,14 +208,15 @@ class _TypeManagementPageState extends State<zffs_TypeManagementPage> {
                       const SizedBox(height: 10),
                       SizedBox(
                         width: leftWidth,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // 按钮点击事件处理逻辑
-                            print(_zhifuleixing.text);
-                            insertData(
-                                _zhifuleixing.text, c.gsiname.toString());
-                          },
-                          child: const Text('增加'),
+                        child: const ElevatedButton(
+                          onPressed: null, // 将onPressed设置为null
+                          child: Text('禁止增加'),
+                          // onPressed: () {
+                          //   // 按钮点击事件处理逻辑
+                          //   print(_username.text);
+                          //   insertData(_username.text, c.gsiname.toString());
+                          // },
+                          // child: Text('增加'),
                         ),
                       ),
                     ],
@@ -237,26 +238,26 @@ class _TypeManagementPageState extends State<zffs_TypeManagementPage> {
                   child: Column(
                     children: [
                       const Text(
-                        '当前支付方式(点击项目可修改-待处理)',
+                        '当前用户列表(点击项目可修改-待处理)',
                         style: TextStyle(fontSize: 16),
                       ),
                       const SizedBox(height: 10),
                       Expanded(
                         flex: 7,
-                        child: zffs_dataList.isNotEmpty
+                        child: user_dataList.isNotEmpty
                             ? ListView.builder(
-                                itemCount: zffs_dataList.length,
+                                itemCount: user_dataList.length,
                                 itemBuilder: (context, index) {
                                   return ListTile(
                                     title: Text(
-                                        'ID: ${zffs_dataList[index]['id']}-${zffs_dataList[index]['zffs']}'),
+                                        'ID: ${user_dataList[index]['id']}--${user_dataList[index]['username']}'),
                                     subtitle: Text(
-                                        '账套: ${zffs_dataList[index]['zhangtao']}'),
+                                        '账套: ${user_dataList[index]['zhangtao']}--${user_dataList[index]['password']}'),
                                     onTap: () {
                                       // 处理点击事件
                                       // 可以在这里进行类型编辑、删除等操作
                                       handleListItemTap(
-                                          zffs_dataList[index]['id'], context);
+                                          user_dataList[index]['id'], context);
                                     },
                                   );
                                 },

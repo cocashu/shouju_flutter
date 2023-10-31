@@ -84,7 +84,6 @@ class _TypeManagementPageState extends State<TypeManagementPage> {
                 String newJflx = textEditingController.text;
                 await performUpdate(id, newJflx);
                 Navigator.of(context).pop();
-                Navigator.pop(context); // 关闭弹出菜单
               },
             ),
           ],
@@ -164,7 +163,7 @@ class _TypeManagementPageState extends State<TypeManagementPage> {
                   // 处理修改操作
                   print('修改' + index.toString());
                   updateJflx(index, itemContext);
-                  // Navigator.pop(context); // 关闭弹出菜单
+                  Navigator.pop(context); // 关闭弹出菜单
                 },
               ),
               ListTile(
@@ -283,7 +282,7 @@ class _TypeManagementPageState extends State<TypeManagementPage> {
                                 },
                               )
                             : const Center(
-                                child: Text('没有离线盘点数据'),
+                                child: Text('没有数据'),
                               ),
                       ),
                     ],
