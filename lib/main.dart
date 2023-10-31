@@ -12,7 +12,6 @@ import 'package:hy_shouju/models/invoice.dart';
 import 'package:get/get.dart';
 import './pages/leixing_page.dart';
 import './pages/shouju.dart';
-import './pages/user_page.dart';
 import 'package:path/path.dart';
 import 'package:easy_sidemenu/easy_sidemenu.dart';
 
@@ -60,11 +59,9 @@ void main() async {
     await db.execute('''
       CREATE TABLE fkmx (
         id INTEGER PRIMARY KEY,
-        fklx_id int,
+        jflx_id int,
         zffs_id int,
         user_id int,
-        fkdw TEXT,
-        fkZY TEXT,
         jine REAL,
         zf_jine REAL,
         uptime DATETIME,
@@ -133,9 +130,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
     super.dispose();
   }
 
-  selectChange(value) {
-    print("值改变了：$value");
-  }
+  selectChange(value) {}
 
   @override
   Widget build(context) {
@@ -298,8 +293,14 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 Container(color: Colors.white, child: const shouju_page()),
                 Container(color: Colors.white, child: InvoicePage()),
                 Container(
-                    color: Colors.white,
-                    child: const user_TypeManagementPage()),
+                  color: Colors.white,
+                  child: const Center(
+                    child: Text(
+                      '用户',
+                      style: TextStyle(fontSize: 35),
+                    ),
+                  ),
+                ),
                 Container(
                   color: Colors.white,
                   child: const Center(
@@ -318,7 +319,6 @@ class _MyCustomFormState extends State<MyCustomForm> {
                     ),
                   ),
                 ),
-                //分割线
                 Container(
                   color: Colors.white,
                   child: const Center(

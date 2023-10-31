@@ -12,7 +12,8 @@ import 'package:hy_shouju/numbertochinese.dart';
 import 'package:get/get.dart';
 import 'package:hy_shouju/pages/hanshu.dart';
 import 'dart:convert';
-import 'package:crypto/crypto.dart';
+import 'package:crypto/crypto.dart'; //md5等哈希算法
+import 'package:encrypt/encrypt.dart';
 
 String generateMd5(String input) {
   var bytes = utf8.encode(input); // 将字符串转换为字节数组
@@ -23,12 +24,15 @@ String generateMd5(String input) {
 Future<Uint8List> makePdf(Invoice invoice) async {
   final pdf = Document();
   final Controller c = Get.put(Controller());
-  final key = Uint8List.fromList(utf8.encode('55750596'));
-  // final iv =
-  //     Uint8List.fromList(utf8.encode('202cb962ac59075b964b07152d234b70'));
-  // final paddedPlaintext = Uint8List.fromList(utf8.encode(
-  //     invoice.fksj + invoice.fklx_id.toString() + invoice.fkje.toString()));
-  // final encryptedData = aesCbcEncrypt(key, iv, paddedPlaintext);
+  final plainText =
+      '${invoice.fksj}-${invoice.fklx_id}-${invoice.zffs_id}-${invoice.fkje}';
+  final key = Key.fromUtf8('EGHTHLaHzA8bQNXH6JIy2GHUuRP6M6Vr');
+  final iv = IV.fromLength(16);
+
+  final encrypter = Encrypter(AES(key));
+
+  final encrypted = encrypter.encrypt(plainText, iv: iv);
+  final decrypted = encrypter.decrypt(encrypted, iv: iv);
   final imageLogo = MemoryImage(
       (await rootBundle.load('assets/logo.png')).buffer.asUint8List());
   final ttf =
@@ -63,9 +67,9 @@ Future<Uint8List> makePdf(Invoice invoice) async {
                     decoration: BoxDecoration(
                         border: Border.all(),
                         borderRadius: const BorderRadius.only(
-                          topRight: Radius.circular(30),
-                          // bottomLeft: Radius.circular(30)
-                        )),
+                            // bottomRight: Radius.circular(30),
+                            // bottomLeft: Radius.circular(30)
+                            )),
                     height: 50,
                     width: 120,
                     child: Wrap(
@@ -73,21 +77,14 @@ Future<Uint8List> makePdf(Invoice invoice) async {
                       runSpacing: 8.0, // 子小部件之间的垂直间距
                       children: <Widget>[
                         Text(
+                          '加密区:${encrypted.base64}\n${invoice.sjhm}',
                           // '加密区:${generateMd5(invoice.fksj + invoice.fklx_id.toString() + invoice.fkje.toString())}\n${invoice.sjhm}',
-
-                          // '加密区:${encryptedData}',
-                          '加密区:${generateMd5(invoice.fksj + invoice.fklx_id.toString() + invoice.fkje.toString())}\n${invoice.sjhm}',
                           style: TextStyle(font: ttf, fontSize: 7),
                         ),
 
                         // 添加更多子小部件...
                       ],
-                    )
-                    // Text(
-                    //   "加密区 \n hellohellohellohelloh hellohellohellohelloh hellohellohellohelloh\n  ${invoice.sjhm}",
-                    //   style: TextStyle(font: ttf, fontSize: 7),
-                    // ),
-                    ),
+                    )),
               ],
             ),
             Container(height: 5),

@@ -382,6 +382,50 @@ class _MyCustomFormState extends State<shouju_page> {
                 child: ElevatedButton(
                   onPressed: () {
                     // 按钮的点击事件处理逻辑InvoicePage
+                    if (_fkdw.text.isNotEmpty == true &&
+                        _fkzy.text.isNotEmpty == true &&
+                        _fklx.dropDownValue != null &&
+                        _jine.text != null &&
+                        double.tryParse(_jine.text)! > 0.00 &&
+                        _fkfs.dropDownValue != null) {
+                      // print(_fkdw.text + '此处可以增加保存数据的过程');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PdfPreviewPage(
+                            invoice: Invoice(
+                              fklx_id: int.parse(_fklx.dropDownValue!.value),
+                              zffs_id: int.parse(_fkfs.dropDownValue!.value),
+                              user_id: 1,
+                              fkdw: _fkdw.text,
+                              fkzy: _fkzy.text,
+                              fkje: double.parse(_jine.text) ?? 0,
+                              fksj: DateTime.now().toString(),
+                              sjhm: _sjhm.text,
+                            ),
+                          ),
+                        ),
+                      );
+                    } else {
+                      // 处理变量为空的情况
+                      // 或者显示错误提示
+                      if (_fklx.dropDownValue == null) {
+                        print('付款类型未选择');
+                      }
+                      if (_fkdw.text?.isNotEmpty != true) {
+                        print('付款单位未填写');
+                      }
+                      if (_fkzy.text?.isNotEmpty != true) {
+                        print('付款摘要未填写');
+                      }
+                      if (_fkfs.dropDownValue == null) {
+                        print('付款方式未选择');
+                      }
+                      if (_jine.text?.isNotEmpty != true ||
+                          double.tryParse(_jine.text)! <= 0.00) {
+                        print('金额填写错误');
+                      }
+                    }
                   },
                   child: const Text('保存'),
                 ),
