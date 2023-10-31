@@ -208,7 +208,7 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
                       const SizedBox(height: 10),
                       SizedBox(
                         width: leftWidth,
-                        child: const ElevatedButton(
+                        child: ElevatedButton(
                           onPressed: null, // 将onPressed设置为null
                           child: Text('禁止增加'),
                           // onPressed: () {
@@ -216,7 +216,7 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
                           //   print(_username.text);
                           //   insertData(_username.text, c.gsiname.toString());
                           // },
-                          // child: Text('增加'),
+                          // child: const Text('增加')
                         ),
                       ),
                     ],

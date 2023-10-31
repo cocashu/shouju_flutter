@@ -418,12 +418,15 @@ class _MyCustomFormState extends State<shouju_page> {
               MaterialPageRoute(
                 builder: (context) => PdfPreviewPage(
                   invoice: Invoice(
+                    fklx_id: 1,
+                    zffs_id: 1,
+                    user_id: 1,
                     fkdw: _fkdw.text,
                     fkzy: _fkzy.text,
-                    fklx: _fklx.dropDownValue!.name.toString(),
+                    // fklx: _fklx.dropDownValue!.name.toString(),
                     fkje: double.parse(_jine.text) ?? 0,
                     fksj: DateTime.now().toString(),
-                    zffs: _fkfs.dropDownValue!.name.toString(),
+                    // zffs: _fkfs.dropDownValue!.name.toString(),
                     sjhm: _sjhm.text,
                   ),
                 ),

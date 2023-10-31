@@ -1,19 +1,21 @@
 class Invoice {
+  final int fklx_id;
+  final int zffs_id;
+  final int user_id;
   final String fkdw;
   final String fkzy;
-  final String fklx;
   final double fkje;
   final String fksj;
-  final String zffs;
   final String sjhm;
 
   Invoice({
+    required this.fklx_id,
+    required this.zffs_id,
+    required this.user_id,
     required this.fkdw,
     required this.fkzy,
-    required this.fklx,
     required this.fkje,
     required this.fksj,
-    required this.zffs,
     required this.sjhm,
   });
 }

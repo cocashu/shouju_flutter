@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:hy_shouju/main.dart';
@@ -9,10 +10,25 @@ import 'package:printing/printing.dart';
 import 'package:hy_shouju/pages/pdfexport/pdf/zifuchuan_utils.dart';
 import 'package:hy_shouju/numbertochinese.dart';
 import 'package:get/get.dart';
+import 'package:hy_shouju/pages/hanshu.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
+
+String generateMd5(String input) {
+  var bytes = utf8.encode(input); // 将字符串转换为字节数组
+  var digest = md5.convert(bytes); // 进行MD5加密
+  return digest.toString(); // 将加密结果转换为字符串
+}
 
 Future<Uint8List> makePdf(Invoice invoice) async {
   final pdf = Document();
   final Controller c = Get.put(Controller());
+  final key = Uint8List.fromList(utf8.encode('55750596'));
+  // final iv =
+  //     Uint8List.fromList(utf8.encode('202cb962ac59075b964b07152d234b70'));
+  // final paddedPlaintext = Uint8List.fromList(utf8.encode(
+  //     invoice.fksj + invoice.fklx_id.toString() + invoice.fkje.toString()));
+  // final encryptedData = aesCbcEncrypt(key, iv, paddedPlaintext);
   final imageLogo = MemoryImage(
       (await rootBundle.load('assets/logo.png')).buffer.asUint8List());
   final ttf =
@@ -57,7 +73,10 @@ Future<Uint8List> makePdf(Invoice invoice) async {
                       runSpacing: 8.0, // 子小部件之间的垂直间距
                       children: <Widget>[
                         Text(
-                          '加密区:${invoice.fksj}+${invoice.fklx}+${invoice.fkje} \n${invoice.sjhm}',
+                          // '加密区:${generateMd5(invoice.fksj + invoice.fklx_id.toString() + invoice.fkje.toString())}\n${invoice.sjhm}',
+
+                          // '加密区:${encryptedData}',
+                          '加密区:${generateMd5(invoice.fksj + invoice.fklx_id.toString() + invoice.fkje.toString())}\n${invoice.sjhm}',
                           style: TextStyle(font: ttf, fontSize: 7),
                         ),
 
@@ -95,7 +114,7 @@ Future<Uint8List> makePdf(Invoice invoice) async {
                           (calculateStringWidth(
                               invoice.fkdw, 12))), //计算字符串长度，以保证相对位置稳定
                   Text(
-                    '收费类型:${invoice.fklx}',
+                    '收费类型:${invoice.fklx_id}',
                     style: TextStyle(font: ttf, fontSize: 12),
                   ),
                 ]),
@@ -117,7 +136,7 @@ Future<Uint8List> makePdf(Invoice invoice) async {
                           (calculateStringWidth(
                               invoice.fkzy, 12))), //计算字符串长度，以保证相对位置稳定
                   Text(
-                    '支付方式:${invoice.zffs}',
+                    '支付方式:${invoice.zffs_id}',
                     style: TextStyle(font: ttf, fontSize: 12),
                   ),
                 ]),
@@ -208,15 +227,27 @@ Future<Uint8List> makePdf(Invoice invoice) async {
   return pdf.save();
 }
 
-// ignore: non_constant_identifier_names
-Widget PaddedText(
-  final String text, {
-  final TextAlign align = TextAlign.left,
-}) =>
-    Padding(
-      padding: const EdgeInsets.all(10),
-      child: Text(
-        text,
-        textAlign: align,
-      ),
-    );
+// // ignore: non_constant_identifier_names
+// Widget PaddedText(
+//   final String text, {
+//   final TextAlign align = TextAlign.left,
+// }) =>
+//     Padding(
+//       padding: const EdgeInsets.all(10),
+//       child: Text(
+//         text,
+//         textAlign: align,
+//       ),
+//     );
+Widget paddedText(
+  String text, {
+  TextAlign align = TextAlign.left,
+}) {
+  return Padding(
+    padding: const EdgeInsets.all(10),
+    child: Text(
+      text,
+      textAlign: align,
+    ),
+  );
+}

@@ -60,9 +60,11 @@ void main() async {
     await db.execute('''
       CREATE TABLE fkmx (
         id INTEGER PRIMARY KEY,
-        jflx_id int,
+        fklx_id int,
         zffs_id int,
         user_id int,
+        fkdw TEXT,
+        fkZY TEXT,
         jine REAL,
         zf_jine REAL,
         uptime DATETIME,
