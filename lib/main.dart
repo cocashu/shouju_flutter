@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hy_shouju/pages/zhifu_page.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'numbertochinese.dart';
-import 'package:intl/intl.dart';
-import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import './pages/shouju_list.dart';
-import 'package:hy_shouju/pages/pdfexport/pdfpreview.dart';
+import './pages/user_page.dart';
 import 'package:hy_shouju/models/invoice.dart';
 import 'package:get/get.dart';
 import './pages/leixing_page.dart';
@@ -294,12 +290,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 Container(color: Colors.white, child: InvoicePage()),
                 Container(
                   color: Colors.white,
-                  child: const Center(
-                    child: Text(
-                      '用户',
-                      style: TextStyle(fontSize: 35),
-                    ),
-                  ),
+                  child: const user_TypeManagementPage(),
                 ),
                 Container(
                   color: Colors.white,

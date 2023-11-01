@@ -179,52 +179,6 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.max,
         children: [
-          Expanded(
-            flex: 3,
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                final leftWidth = constraints.maxWidth / 2;
-                return Container(
-                  width: leftWidth,
-                  padding: const EdgeInsets.all(8),
-                  alignment: Alignment.center,
-                  child: Column(
-                    children: [
-                      const Text(
-                        '增加用户',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        width: leftWidth,
-                        child: TextField(
-                          controller: _username,
-                          decoration: const InputDecoration(
-                            // hintText: '文本框',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        width: leftWidth,
-                        child: ElevatedButton(
-                          onPressed: null, // 将onPressed设置为null
-                          child: Text('禁止增加'),
-                          // onPressed: () {
-                          //   // 按钮点击事件处理逻辑
-                          //   print(_username.text);
-                          //   insertData(_username.text, c.gsiname.toString());
-                          // },
-                          // child: const Text('增加')
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
           const VerticalDivider(),
           Expanded(
             flex: 7,
@@ -262,8 +216,47 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
                                   );
                                 },
                               )
-                            : const Center(
-                                child: Text('没有数据'),
+                            : LayoutBuilder(
+                                builder: (BuildContext context,
+                                    BoxConstraints constraints) {
+                                  final leftWidth = constraints.maxWidth / 2;
+                                  return Container(
+                                    width: leftWidth,
+                                    padding: const EdgeInsets.all(8),
+                                    alignment: Alignment.center,
+                                    child: Column(
+                                      children: [
+                                        const Text(
+                                          '增加用户',
+                                          style: TextStyle(fontSize: 16),
+                                        ),
+                                        const SizedBox(height: 10),
+                                        SizedBox(
+                                          width: leftWidth,
+                                          child: TextField(
+                                            controller: _username,
+                                            decoration: const InputDecoration(
+                                              // hintText: '文本框',
+                                              border: OutlineInputBorder(),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 10),
+                                        SizedBox(
+                                          width: leftWidth,
+                                          child: ElevatedButton(
+                                              onPressed: () {
+                                                // 按钮点击事件处理逻辑
+                                                print(_username.text);
+                                                insertData(_username.text,
+                                                    c.gsiname.toString());
+                                              },
+                                              child: const Text('增加')),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
                               ),
                       ),
                     ],
