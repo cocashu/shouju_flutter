@@ -39,7 +39,7 @@ void main() async {
     await db.execute('''
       CREATE TABLE user (
         id INTEGER PRIMARY KEY,
-        username TEXT,
+        user TEXT,
         password TEXT,
         zhangtao TEXT
       )
@@ -58,10 +58,13 @@ void main() async {
         jflx_id int,
         zffs_id int,
         user_id int,
+        fkzy TEXT,
+        fkdw TEXT,
         jine REAL,
         zf_jine REAL,
         uptime DATETIME,
-        zhangtao_id int
+        zhangtao_id int,
+        sjhm TEXT
       )
     ''');
   });

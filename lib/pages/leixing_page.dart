@@ -19,6 +19,15 @@ class TypeManagementPage extends StatefulWidget {
 class _TypeManagementPageState extends State<TypeManagementPage> {
   final Controller c = Get.put(Controller());
   final TextEditingController _jiaofeileixing = TextEditingController();
+  final TextEditingController _guanlimima = TextEditingController();
+  bool isPasswordCorrect = false; // 管理密码是否正确的标志
+  // 管理密码校验逻辑
+  bool checkPassword(String password) {
+    // 在这里执行管理密码校验逻辑，返回一个布尔值表示密码是否正确
+    // 例如，你可以将正确的管理密码存储在变量中，然后与输入的密码进行比较
+    String correctPassword = '123';
+    return password == correctPassword;
+  }
 
   List<Map<String, dynamic>> dataList = [];
   Future<Database> openDatabaseConnection() async {
@@ -115,26 +124,6 @@ class _TypeManagementPageState extends State<TypeManagementPage> {
     });
     await database.close();
   }
-  // Future<void> updateJflx(int id, String newJflx) async {
-  //   Database database = await openDatabaseConnection();
-  //   String tableName = "jflx";
-
-  //   Map<String, dynamic> updatedData = {
-  //     "jflx": newJflx,
-  //   };
-
-  //   await database.update(
-  //     tableName,
-  //     updatedData,
-  //     where: 'id = ?',
-  //     whereArgs: [id],
-  //   );
-  //   // 重新获取数据并更新UI
-  //   setState(() {
-  //     fetchData();
-  //   });
-  //   await database.close();
-  // }
 
 // 刷新数据
   Future<void> fetchData() async {
@@ -226,15 +215,39 @@ class _TypeManagementPageState extends State<TypeManagementPage> {
                         ),
                       ),
                       const SizedBox(height: 10),
+                      const Text(
+                        '管理密码',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: leftWidth,
+                        child: TextField(
+                          controller: _guanlimima,
+                          obscureText: true,
+                          decoration: const InputDecoration(
+                            hintText: '管理密码',
+                            border: OutlineInputBorder(),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              isPasswordCorrect = checkPassword(value);
+                            });
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 10),
                       SizedBox(
                         width: leftWidth,
                         child: ElevatedButton(
-                          onPressed: () {
-                            // 按钮点击事件处理逻辑
-                            print(_jiaofeileixing.text);
-                            insertData(
-                                _jiaofeileixing.text, c.gsiname.toString());
-                          },
+                          onPressed: isPasswordCorrect
+                              ? () {
+                                  // 按钮点击事件处理逻辑
+                                  print(_jiaofeileixing.text);
+                                  insertData(_jiaofeileixing.text,
+                                      c.gsiname.toString());
+                                }
+                              : null, // 当密码不正确时禁用按钮
                           child: const Text('增加'),
                         ),
                       ),
@@ -257,7 +270,7 @@ class _TypeManagementPageState extends State<TypeManagementPage> {
                   child: Column(
                     children: [
                       const Text(
-                        '当前缴费类型(点击项目可修改-待处理)',
+                        '当前缴费类型(点击项目可修改)',
                         style: TextStyle(fontSize: 16),
                       ),
                       const SizedBox(height: 10),
@@ -272,12 +285,14 @@ class _TypeManagementPageState extends State<TypeManagementPage> {
                                         'ID: ${dataList[index]['id']}-${dataList[index]['jflx']}'),
                                     subtitle: Text(
                                         '账套: ${dataList[index]['zhangtao']}'),
-                                    onTap: () {
-                                      // 处理点击事件
-                                      // 可以在这里进行类型编辑、删除等操作
-                                      handleListItemTap(
-                                          dataList[index]['id'], context);
-                                    },
+                                    onTap: isPasswordCorrect
+                                        ? () {
+                                            // 处理点击事件
+                                            // 可以在这里进行类型编辑、删除等操作
+                                            handleListItemTap(
+                                                dataList[index]['id'], context);
+                                          }
+                                        : null,
                                   );
                                 },
                               )

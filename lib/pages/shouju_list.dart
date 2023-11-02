@@ -1,64 +1,103 @@
 import 'package:flutter/material.dart';
 import 'package:hy_shouju/models/invoice.dart';
 import 'package:hy_shouju/pages/pdfexport/pdfpreview.dart';
+import 'package:path/path.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-class InvoicePage extends StatelessWidget {
+class InvoicePage extends StatefulWidget {
   InvoicePage({Key? key}) : super(key: key);
 
-  final invoices = <Invoice>[
-    Invoice(
-        fklx_id: 1,
-        zffs_id: 1,
-        user_id: 1,
-        fkdw: 'David Thomas',
-        fkzy: '11Fake St\r\nBermuda Triangle',
-        fkje: 1000.00,
-        fksj: '2023-10-21',
-        sjhm: '1234567890'),
-    Invoice(
-        fklx_id: 2,
-        zffs_id: 2,
-        user_id: 1,
-        fkdw: '打发士大夫',
-        fkzy: '房屋租金2020年10月1日至2022年10月1 日',
-        fkje: 999999999.99,
-        fksj: '2023-10-22',
-        sjhm: '1234567890'),
-    Invoice(
-        fklx_id: 3,
-        zffs_id: 3,
-        user_id: 1,
-        fkdw: 'David',
-        fkzy: '33 Fake St\r\nBermuda Triangle',
-        fkje: 123.456,
-        fksj: '2023-10-23',
-        sjhm: '1234567890'),
-  ];
+  @override
+  _InvoicePageState createState() => _InvoicePageState();
+}
 
+class _InvoicePageState extends State<InvoicePage> {
+  List<Map<String, dynamic>> dataList = [];
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  Future<Database> openDatabaseConnection() async {
+    String databasePath = await getDatabasesPath();
+    String databaseFile = join(databasePath, 'my_database.db');
+    return openDatabase(databaseFile);
+  }
+
+  Future<void> fetchData() async {
+    Database database = await openDatabaseConnection();
+    String tableName = "fkmx";
+    List<Map<String, dynamic>> result = await database.query(tableName);
+    setState(() {
+      dataList = result;
+    });
+    await database.close();
+  }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: dataList.isNotEmpty
+//           ? ListView.builder(
+//               itemCount: dataList.length,
+//               itemBuilder: (context, index) {
+//                 return ListTile(
+//                   title: Text(dataList[index]['fkdw']),
+//                   subtitle: Text(dataList[index]['fkzy']),
+//                   trailing:
+//                       Text('￥${dataList[index]['jine'].toStringAsFixed(2)}'),
+//                   onTap: () {
+//                     // Navigator.of(context).push(
+//                     //   MaterialPageRoute(
+//                     //     builder: (builder) => PdfPreviewPage(invoice: invoice),
+//                     //   ),
+//                     // );
+//                   },
+//                 );
+//               },
+//             )
+//           : const Center(
+//               child: Text('没有数据'),
+//             ),
+//     );
+//   }
+// }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('收据列表'),
-      // ),
-      body: ListView(
-        children: [
-          ...invoices.map(
-            (e) => ListTile(
-              title: Text(e.fkdw),
-              subtitle: Text(e.fkzy),
-              trailing: Text('\￥${e.fkje.toStringAsFixed(2)}'),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (builder) => PdfPreviewPage(invoice: e),
-                  ),
+      body: dataList.isNotEmpty
+          ? ListView.builder(
+              itemCount: dataList.length,
+              itemBuilder: (context, index) {
+                Map<String, dynamic> data = dataList[index];
+                Invoice invoice = Invoice(
+                  fklx_id: data['jflx_id'],
+                  zffs_id: data['zffs_id'],
+                  user_id: data['user_id'],
+                  fkdw: data['fkdw'],
+                  fkzy: data['fkzy'],
+                  fkje: data['jine'],
+                  fksj: data['uptime'],
+                  sjhm: data['sjhm'], // 根据你的实际情况进行修改
+                );
+                return ListTile(
+                  title: Text(invoice.fkdw),
+                  subtitle: Text(invoice.fkzy),
+                  trailing: Text('\￥${invoice.fkje.toStringAsFixed(2)}'),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (builder) => PdfPreviewPage(invoice: invoice),
+                      ),
+                    );
+                  },
                 );
               },
+            )
+          : const Center(
+              child: Text('没有数据'),
             ),
-          )
-        ],
-      ),
     );
   }
 }

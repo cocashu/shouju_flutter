@@ -10,15 +10,36 @@ import 'package:printing/printing.dart';
 import 'package:hy_shouju/pages/pdfexport/pdf/zifuchuan_utils.dart';
 import 'package:hy_shouju/numbertochinese.dart';
 import 'package:get/get.dart';
-import 'package:hy_shouju/pages/hanshu.dart';
-import 'dart:convert';
 import 'package:crypto/crypto.dart'; //md5等哈希算法
 import 'package:encrypt/encrypt.dart';
+import 'package:path/path.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 String generateMd5(String input) {
   var bytes = utf8.encode(input); // 将字符串转换为字节数组
   var digest = md5.convert(bytes); // 进行MD5加密
   return digest.toString(); // 将加密结果转换为字符串
+}
+
+Future<Database> openDatabaseConnection() async {
+  String databasePath = await getDatabasesPath();
+  String databaseFile = join(databasePath, 'my_database.db');
+  return openDatabase(databaseFile);
+}
+
+Future<String> queryById(int id, String tableName, String zhangTao) async {
+  Database database = await openDatabaseConnection();
+  List<Map<String, dynamic>> result = await database.rawQuery(
+    'SELECT $tableName FROM $tableName WHERE id = ? AND zhangTao = ?',
+    [id, zhangTao],
+  );
+  await database.close();
+
+  if (result.isNotEmpty) {
+    return result.first['$tableName'];
+  } else {
+    return '未找到指定项目';
+  }
 }
 
 Future<Uint8List> makePdf(Invoice invoice) async {
@@ -32,7 +53,10 @@ Future<Uint8List> makePdf(Invoice invoice) async {
   final encrypter = Encrypter(AES(key));
 
   final encrypted = encrypter.encrypt(plainText, iv: iv);
-  final decrypted = encrypter.decrypt(encrypted, iv: iv);
+  // final decrypted = encrypter.decrypt(encrypted, iv: iv); //解密
+  final jflx = await queryById(invoice.fklx_id, 'jflx', 'HY商贸');
+  final zffs = await queryById(invoice.zffs_id, 'zffs', 'HY商贸');
+  final user = await queryById(invoice.user_id, 'user', 'HY商贸');
   final imageLogo = MemoryImage(
       (await rootBundle.load('assets/logo.png')).buffer.asUint8List());
   final ttf =
@@ -111,7 +135,8 @@ Future<Uint8List> makePdf(Invoice invoice) async {
                           (calculateStringWidth(
                               invoice.fkdw, 12))), //计算字符串长度，以保证相对位置稳定
                   Text(
-                    '收费类型:${invoice.fklx_id}',
+                    // '收费类型:${invoice.fklx_id}',
+                    '收费类型:$jflx',
                     style: TextStyle(font: ttf, fontSize: 12),
                   ),
                 ]),
@@ -133,7 +158,7 @@ Future<Uint8List> makePdf(Invoice invoice) async {
                           (calculateStringWidth(
                               invoice.fkzy, 12))), //计算字符串长度，以保证相对位置稳定
                   Text(
-                    '支付方式:${invoice.zffs_id}',
+                    '收费类型:$zffs',
                     style: TextStyle(font: ttf, fontSize: 12),
                   ),
                 ]),
@@ -205,7 +230,7 @@ Future<Uint8List> makePdf(Invoice invoice) async {
                 width: 100,
               ),
               Text(
-                ' 出纳:${c.username}',
+                ' 出纳:$user',
                 style: TextStyle(font: ttf, fontSize: 10),
               ),
               SizedBox(

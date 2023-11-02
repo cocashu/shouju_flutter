@@ -23,6 +23,32 @@ class shouju_page extends StatefulWidget {
   _MyCustomFormState createState() => _MyCustomFormState();
 }
 
+Future<Database> openDatabaseConnection() async {
+  String databasePath = await getDatabasesPath();
+  String databaseFile = join(databasePath, 'my_database.db');
+  return openDatabase(databaseFile);
+}
+
+Future<void> insertDataToTable(Invoice invoice) async {
+  Database database = await openDatabaseConnection();
+  await database.insert(
+    'fkmx',
+    {
+      'jflx_id': invoice.fklx_id,
+      'zffs_id': invoice.zffs_id,
+      'user_id': invoice.user_id,
+      'fkzy': invoice.fkzy,
+      'fkdw': invoice.fkdw,
+      'jine': invoice.fkje,
+      'uptime': invoice.fksj,
+      'sjhm': invoice.sjhm,
+      'zhangtao_id': 1, //默认账套
+      'zf_jine': 0, //默认作废金额0
+    },
+  );
+  await database.close();
+}
+
 class _MyCustomFormState extends State<shouju_page> {
   final TextEditingController _jine = TextEditingController();
   final displayText = ''.obs;
@@ -385,7 +411,18 @@ class _MyCustomFormState extends State<shouju_page> {
                         _jine.text != null &&
                         double.tryParse(_jine.text)! > 0.00 &&
                         _fkfs.dropDownValue != null) {
-                      // print(_fkdw.text + '此处可以增加保存数据的过程');
+                      // 保存数据的过程
+                      Invoice invoice = Invoice(
+                        fklx_id: int.parse(_fklx.dropDownValue!.value),
+                        zffs_id: int.parse(_fkfs.dropDownValue!.value),
+                        user_id: 1,
+                        fkdw: _fkdw.text,
+                        fkzy: _fkzy.text,
+                        fkje: double.parse(_jine.text) ?? 0,
+                        fksj: DateTime.now().toString(),
+                        sjhm: _sjhm.text,
+                      );
+                      insertDataToTable(invoice);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -427,75 +464,9 @@ class _MyCustomFormState extends State<shouju_page> {
                   child: const Text('保存'),
                 ),
               ),
-              SizedBox(
-                width: 100,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => InvoicePage()), // 导航到 PrintPage
-                    );
-                  },
-                  child: const Text('列表'),
-                ),
-              ),
             ],
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (_fkdw.text.isNotEmpty == true &&
-              _fkzy.text.isNotEmpty == true &&
-              _fklx.dropDownValue != null &&
-              _jine.text != null &&
-              double.tryParse(_jine.text)! > 0.00 &&
-              _fkfs.dropDownValue != null) {
-            print(_fkdw.text + '此处可以增加保存数据的过程');
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PdfPreviewPage(
-                  invoice: Invoice(
-                    fklx_id: 1,
-                    zffs_id: 1,
-                    user_id: 1,
-                    fkdw: _fkdw.text,
-                    fkzy: _fkzy.text,
-                    // fklx: _fklx.dropDownValue!.name.toString(),
-                    fkje: double.parse(_jine.text) ?? 0,
-                    fksj: DateTime.now().toString(),
-                    // zffs: _fkfs.dropDownValue!.name.toString(),
-                    sjhm: _sjhm.text,
-                  ),
-                ),
-              ),
-            );
-          } else {
-            // 处理变量为空的情况
-            // 或者显示错误提示
-            if (_fklx.dropDownValue == null) {
-              print('付款类型未选择');
-            }
-            if (_fkdw.text?.isNotEmpty != true) {
-              print('付款单位未填写');
-            }
-            if (_fkzy.text?.isNotEmpty != true) {
-              print('付款摘要未填写');
-            }
-            if (_fkfs.dropDownValue == null) {
-              print('付款方式未选择');
-            }
-            if (_jine.text?.isNotEmpty != true ||
-                double.tryParse(_jine.text)! <= 0.00) {
-              print('金额填写错误');
-            }
-          }
-        },
-        // tooltip: '打印按钮',
-        child: const Icon(Icons.print),
       ),
     );
   }

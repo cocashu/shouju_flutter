@@ -34,7 +34,7 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
     Database database = await openDatabaseConnection();
     String tableName = "user";
     Map<String, dynamic> data = {
-      "username": username,
+      "user": username,
       "password": generateMd5(username),
       "zhangtao": zhangtao,
     };
@@ -204,7 +204,7 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
                                 itemBuilder: (context, index) {
                                   return ListTile(
                                     title: Text(
-                                        'ID: ${user_dataList[index]['id']}--${user_dataList[index]['username']}'),
+                                        'ID: ${user_dataList[index]['id']}--${user_dataList[index]['user']}'),
                                     subtitle: Text(
                                         '账套: ${user_dataList[index]['zhangtao']}--${user_dataList[index]['password']}'),
                                     onTap: () {
