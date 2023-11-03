@@ -21,12 +21,26 @@ class _TypeManagementPageState extends State<TypeManagementPage> {
   final TextEditingController _jiaofeileixing = TextEditingController();
   final TextEditingController _guanlimima = TextEditingController();
   bool isPasswordCorrect = false; // 管理密码是否正确的标志
+  //查询user 表中ID为1 的密码
+  Future<String> queryPassword() async {
+    Database database = await openDatabaseConnection();
+    String tableName = "user";
+    var result =
+        await database.query(tableName, where: 'id =?', whereArgs: [1]);
+    if (result.isNotEmpty) {
+      return result.first['password'].toString();
+    } else {
+      return '未找到指定项目';
+    }
+  }
+
   // 管理密码校验逻辑
-  bool checkPassword(String password) {
-    // 在这里执行管理密码校验逻辑，返回一个布尔值表示密码是否正确
-    // 例如，你可以将正确的管理密码存储在变量中，然后与输入的密码进行比较
-    String correctPassword = '123';
-    return password == correctPassword;
+  Future<bool> checkPassword() async {
+    var password = await queryPassword();
+    isPasswordCorrect =
+        password.toString() == '672c9e8060c35db2c0f7d79bda8fc0d1';
+    print(isPasswordCorrect.toString());
+    return isPasswordCorrect;
   }
 
   List<Map<String, dynamic>> dataList = [];
@@ -176,6 +190,7 @@ class _TypeManagementPageState extends State<TypeManagementPage> {
   void initState() {
     super.initState();
     fetchData();
+    checkPassword();
   }
 
   @override
@@ -215,27 +230,6 @@ class _TypeManagementPageState extends State<TypeManagementPage> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      const Text(
-                        '管理密码',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        width: leftWidth,
-                        child: TextField(
-                          controller: _guanlimima,
-                          obscureText: true,
-                          decoration: const InputDecoration(
-                            hintText: '管理密码',
-                            border: OutlineInputBorder(),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              isPasswordCorrect = checkPassword(value);
-                            });
-                          },
-                        ),
-                      ),
                       const SizedBox(height: 10),
                       SizedBox(
                         width: leftWidth,

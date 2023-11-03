@@ -8,6 +8,7 @@ import 'package:hy_shouju/models/invoice.dart';
 import 'package:get/get.dart';
 import './pages/leixing_page.dart';
 import './pages/shouju.dart';
+import './pages/shujubak.dart';
 import 'package:path/path.dart';
 import 'package:easy_sidemenu/easy_sidemenu.dart';
 
@@ -297,12 +298,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 ),
                 Container(
                   color: Colors.white,
-                  child: const Center(
-                    child: Text(
-                      'Files',
-                      style: TextStyle(fontSize: 35),
-                    ),
-                  ),
+                  child: MybakHomePage(),
                 ),
                 Container(
                   color: Colors.white,

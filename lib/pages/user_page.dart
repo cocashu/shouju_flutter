@@ -71,6 +71,7 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
           title: const Text('修改密码'),
           content: TextField(
             controller: textEditingController,
+            obscureText: true,
           ),
           actions: [
             TextButton(
@@ -172,9 +173,6 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('类型管理'),
-      // ),
       body: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.max,
@@ -192,7 +190,7 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
                   child: Column(
                     children: [
                       const Text(
-                        '当前用户列表(点击项目可修改-待处理)',
+                        '当前用户列表(点击项目可修改)',
                         style: TextStyle(fontSize: 16),
                       ),
                       const SizedBox(height: 10),

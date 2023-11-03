@@ -3,6 +3,8 @@ import 'package:hy_shouju/main.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 class Type {
   final String name;
@@ -19,6 +21,29 @@ class zffs_TypeManagementPage extends StatefulWidget {
 class _TypeManagementPageState extends State<zffs_TypeManagementPage> {
   final Controller c = Get.put(Controller());
   final TextEditingController _zhifuleixing = TextEditingController();
+  bool isPasswordCorrect = false; // 管理密码是否正确的标志
+
+  //查询user 表中ID为1 的密码
+  Future<String> queryPassword() async {
+    Database database = await openDatabaseConnection();
+    String tableName = "user";
+    var result =
+        await database.query(tableName, where: 'id =?', whereArgs: [1]);
+    if (result.isNotEmpty) {
+      return result.first['password'].toString();
+    } else {
+      return '未找到指定项目';
+    }
+  }
+
+  // 管理密码校验逻辑
+  Future<bool> checkPassword() async {
+    var password = await queryPassword();
+    isPasswordCorrect =
+        password.toString() == '672c9e8060c35db2c0f7d79bda8fc0d1';
+    print(isPasswordCorrect.toString());
+    return isPasswordCorrect;
+  }
 
   List<Map<String, dynamic>> zffs_dataList = [];
   Future<Database> openDatabaseConnection() async {
@@ -167,6 +192,7 @@ class _TypeManagementPageState extends State<zffs_TypeManagementPage> {
   void initState() {
     super.initState();
     fetchData();
+    checkPassword();
   }
 
   @override
@@ -203,18 +229,23 @@ class _TypeManagementPageState extends State<zffs_TypeManagementPage> {
                             // hintText: '文本框',
                             border: OutlineInputBorder(),
                           ),
+                          onChanged: (value) {
+                            checkPassword();
+                          },
                         ),
                       ),
                       const SizedBox(height: 10),
                       SizedBox(
                         width: leftWidth,
                         child: ElevatedButton(
-                          onPressed: () {
-                            // 按钮点击事件处理逻辑
-                            print(_zhifuleixing.text);
-                            insertData(
-                                _zhifuleixing.text, c.gsiname.toString());
-                          },
+                          onPressed: isPasswordCorrect
+                              ? () {
+                                  // 按钮点击事件处理逻辑
+                                  print(_zhifuleixing.text);
+                                  insertData(
+                                      _zhifuleixing.text, c.gsiname.toString());
+                                }
+                              : null, // 当密码不正确时禁用按钮
                           child: const Text('增加'),
                         ),
                       ),
@@ -252,12 +283,15 @@ class _TypeManagementPageState extends State<zffs_TypeManagementPage> {
                                         'ID: ${zffs_dataList[index]['id']}-${zffs_dataList[index]['zffs']}'),
                                     subtitle: Text(
                                         '账套: ${zffs_dataList[index]['zhangtao']}'),
-                                    onTap: () {
-                                      // 处理点击事件
-                                      // 可以在这里进行类型编辑、删除等操作
-                                      handleListItemTap(
-                                          zffs_dataList[index]['id'], context);
-                                    },
+                                    onTap: isPasswordCorrect
+                                        ? () {
+                                            // 处理点击事件
+                                            // 可以在这里进行类型编辑、删除等操作
+                                            handleListItemTap(
+                                                zffs_dataList[index]['id'],
+                                                context);
+                                          }
+                                        : null,
                                   );
                                 },
                               )
