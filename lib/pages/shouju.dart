@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hy_shouju/main.dart';
+import 'package:printing/printing.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../numbertochinese.dart';
 import 'package:intl/intl.dart';
@@ -50,8 +51,9 @@ Future<void> insertDataToTable(Invoice invoice) async {
 }
 
 class _MyCustomFormState extends State<shouju_page> {
-  final TextEditingController _jine = TextEditingController();
-  final displayText = ''.obs;
+  final TextEditingController _jine = TextEditingController(text: '0');
+  final jineText = ''.obs;
+  final sjhmText = ''.obs;
   late SingleValueDropDownController _fklx;
   late SingleValueDropDownController _fkfs;
 
@@ -62,6 +64,7 @@ class _MyCustomFormState extends State<shouju_page> {
   Future<List<DropDownValueModel>>? _zffs_loadDataFuture;
   late Invoice invoice;
   final Controller c = Get.put(Controller());
+  List<String> errorMessages = [];
   @override
   void initState() {
     _fklx = SingleValueDropDownController();
@@ -75,6 +78,24 @@ class _MyCustomFormState extends State<shouju_page> {
     String databasePath = await getDatabasesPath();
     String databaseFile = join(databasePath, 'my_database.db');
     return openDatabase(databaseFile);
+  }
+
+  //查询某类型收据最大编号
+  Future<String> getMaxSjhm(int jflxId, int zhangtao) async {
+    // 打开数据库连接
+    Database db = await openDatabaseConnection();
+    // 执行查询
+    List<Map<String, dynamic>> result = await db.rawQuery(
+      'SELECT max(id),sjhm FROM fkmx WHERE jflx_id = ? AND zhangtao_id = ?',
+      [jflxId, zhangtao],
+    );
+    // 关闭数据库连接
+    await db.close();
+    // 提取结果
+    String maxSjhm =
+        result[0]['sjhm'] != null ? result[0]['sjhm'].toString() : '0';
+    // print('函数内部输出' + maxSjhm);
+    return maxSjhm;
   }
 
 // 加载缴费类型
@@ -116,9 +137,9 @@ class _MyCustomFormState extends State<shouju_page> {
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
-    _jine.dispose();
-    _fklx.dispose();
-    _fkfs.dispose();
+    // _jine.dispose();
+    // _fklx.dispose();
+    // _fkfs.dispose();
     super.dispose();
   }
 
@@ -207,9 +228,17 @@ class _MyCustomFormState extends State<shouju_page> {
                             const InputDecoration(hintText: "在这输入过滤文字"),
                         dropDownItemCount: 6,
                         dropDownList: dataList,
-                        onChanged: (val) {
-                          _sjhm.text = val.value.toString();
+                        onChanged: (val) async {
                           //需要查询当前类型下面有多少数据
+                          int count = int.parse(val.value);
+                          Future<String?> myFuture = getMaxSjhm(count, 1);
+                          String? result = await myFuture;
+                          sjhmText.value =
+                              (int.parse(result.toString()) + 1).toString() ??
+                                  '0';
+                          String _sjhmstr =
+                              '${val.value.padLeft(2, '0')}-${sjhmText.value.padLeft(8, '0')}';
+                          _sjhm.text = _sjhmstr;
                         },
                       );
                     } else {
@@ -312,7 +341,7 @@ class _MyCustomFormState extends State<shouju_page> {
                     ],
                     onChanged: (value) {
                       setState(() {
-                        displayText.value = value;
+                        jineText.value = value;
                       });
                     },
                   ),
@@ -387,7 +416,7 @@ class _MyCustomFormState extends State<shouju_page> {
                 const SizedBox(width: 10),
                 SizedBox(
                   child: Text(
-                    convertToChineseMoney(displayText.value),
+                    convertToChineseMoney(jineText.value),
                     textAlign: TextAlign.left,
                     style: const TextStyle(fontSize: 25),
                   ),
@@ -420,7 +449,7 @@ class _MyCustomFormState extends State<shouju_page> {
                         fkzy: _fkzy.text,
                         fkje: double.parse(_jine.text) ?? 0,
                         fksj: DateTime.now().toString(),
-                        sjhm: _sjhm.text,
+                        sjhm: sjhmText.value,
                       );
                       insertDataToTable(invoice);
                       Navigator.push(
@@ -442,26 +471,50 @@ class _MyCustomFormState extends State<shouju_page> {
                       );
                     } else {
                       // 处理变量为空的情况
-                      // 或者显示错误提示
                       if (_fklx.dropDownValue == null) {
-                        print('付款类型未选择');
+                        errorMessages.add('付款类型未选择');
                       }
-                      if (_fkdw.text?.isNotEmpty != true) {
-                        print('付款单位未填写');
+                      if (_fkdw.text?.isEmpty == true) {
+                        errorMessages.add('付款单位未填写');
                       }
-                      if (_fkzy.text?.isNotEmpty != true) {
-                        print('付款摘要未填写');
+                      if (_fkzy.text?.isEmpty == true) {
+                        errorMessages.add('付款摘要未填写');
                       }
                       if (_fkfs.dropDownValue == null) {
-                        print('付款方式未选择');
+                        errorMessages.add('付款方式未选择');
                       }
-                      if (_jine.text?.isNotEmpty != true ||
+                      if (_jine.text?.isEmpty == true ||
                           double.tryParse(_jine.text)! <= 0.00) {
-                        print('金额填写错误');
+                        errorMessages.add('金额填写错误');
+                      }
+                      if (errorMessages.isNotEmpty) {
+                        String errorMessage = errorMessages.join(', ');
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('错误提示$errorMessage'),
+                            backgroundColor: Colors.red, // 设置背景色为红色
+                          ),
+                        );
+                        errorMessages = [];
                       }
                     }
                   },
                   child: const Text('保存'),
+                ),
+              ),
+              SizedBox(
+                width: 100,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () {
+                    _fkdw.text = '';
+                    _fkzy.text = '';
+                    _jine.text = '0';
+                    _sjhm.text = '';
+                    jineText.value = '0';
+                    sjhmText.value = '';
+                  },
+                  child: const Text('清空'),
                 ),
               ),
             ],

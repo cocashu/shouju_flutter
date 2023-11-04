@@ -26,7 +26,7 @@ class MybakHomePage extends StatelessWidget {
     await database.close();
 
     final backupFile = await File(databaseFile).copy(backupFilePath);
-    final backupMessage = '数据备份至: ${backupFile.path}';
+    final backupMessage = '数据备份成功，已保存至: ${backupFile.path}';
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(backupMessage)),
@@ -47,11 +47,11 @@ class MybakHomePage extends StatelessWidget {
       final backupFilePath = backupFiles.files.single.path!;
       await File(backupFilePath).copy(databaseFile);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('回复文件的路径为: $backupFilePath')),
+        SnackBar(content: Text('恢复备份文件的路径为: $backupFilePath,恢复成功！')),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('没有选择恢复的文件')),
+        SnackBar(content: Text('没有选择需要恢复的文件')),
       );
     }
   }
@@ -63,13 +63,28 @@ class MybakHomePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            ElevatedButton(
-              onPressed: () => backupDatabase(context),
-              child: Text('备份数据'),
+            SizedBox(
+              width: 200,
+              child: ElevatedButton(
+                onPressed: () => restoreDatabase(context),
+                child: Text('数据升级'),
+              ),
             ),
-            ElevatedButton(
-              onPressed: () => restoreDatabase(context),
-              child: Text('恢复数据'),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: 200,
+              child: ElevatedButton(
+                onPressed: () => backupDatabase(context),
+                child: Text('备份数据'),
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: 200,
+              child: ElevatedButton(
+                onPressed: () => restoreDatabase(context),
+                child: Text('恢复数据'),
+              ),
             ),
           ],
         ),

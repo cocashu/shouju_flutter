@@ -101,7 +101,7 @@ Future<Uint8List> makePdf(Invoice invoice) async {
                       runSpacing: 8.0, // 子小部件之间的垂直间距
                       children: <Widget>[
                         Text(
-                          '加密区:${encrypted.base64}\n${invoice.sjhm}',
+                          '加密区:${encrypted.base64}${invoice.sjhm}==\n单据号${invoice.fklx_id.toString().padLeft(2, '0')}-${invoice.sjhm.toString().padLeft(8, '0')} ',
                           // '加密区:${generateMd5(invoice.fksj + invoice.fklx_id.toString() + invoice.fkje.toString())}\n${invoice.sjhm}',
                           style: TextStyle(font: ttf, fontSize: 7),
                         ),

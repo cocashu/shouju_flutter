@@ -65,7 +65,7 @@ void main() async {
         zf_jine REAL,
         uptime DATETIME,
         zhangtao_id int,
-        sjhm TEXT
+        sjhm        TEXT
       )
     ''');
   });
