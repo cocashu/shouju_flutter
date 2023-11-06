@@ -87,7 +87,6 @@ class _MyCustomFormState extends State<shouju_page> {
         DateFormat('yyyy年MM月dd日').format(DateTime.now()).toUpperCase();
     final Size size = MediaQuery.of(context).size;
     final double width = size.width - 300;
-    final double height = size.height;
     // 使用Get.put()实例化你的类，使其对当下的所有子路由可用。
 
     return Scaffold(

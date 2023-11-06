@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:hy_shouju/main.dart';
 import 'package:get/get.dart';
-import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
+import 'package:hy_shouju/models/mysqlite.dart';
 
+// ignore: camel_case_types
 class user_TypeManagementPage extends StatefulWidget {
   const user_TypeManagementPage({Key? key}) : super(key: key); //嵌套模式
   @override
+  // ignore: library_private_types_in_public_api
   _TypeManagementPageState createState() => _TypeManagementPageState();
 }
 
@@ -16,62 +16,71 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
   final Controller c = Get.put(Controller());
   final TextEditingController _username = TextEditingController();
 
+  // ignore: non_constant_identifier_names
   List<Map<String, dynamic>> user_dataList = [];
-  Future<Database> openDatabaseConnection() async {
-    String databasePath = await getDatabasesPath();
-    String databaseFile = join(databasePath, 'my_database.db');
-    return openDatabase(databaseFile);
-  }
-
-  String generateMd5(String input) {
-    var bytes = utf8.encode(input); // 将字符串转换为字节数组
-    var digest = md5.convert(bytes); // 进行MD5加密
-    return digest.toString(); // 将加密结果转换为字符串
-  }
 
 //插入数据
   Future<void> insertData(String username, String zhangtao) async {
-    Database database = await openDatabaseConnection();
-    String tableName = "user";
-    Map<String, dynamic> data = {
-      "user": username,
-      "password": generateMd5(username),
-      "zhangtao": zhangtao,
-    };
-    await database.insert(tableName, data);
-    // 重新获取数据并更新UI
-    setState(() {
-      fetchData();
-    });
-    await database.close();
+    // 检查用户名是否重复
+    bool isUsernameDuplicate = await checkUsernameDuplicate(username);
+
+    if (isUsernameDuplicate) {
+      // ignore: use_build_context_synchronously
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('用户名重复'),
+            content: const Text('该用户名已存在，请输入一个不同的用户名。'),
+            actions: [
+              TextButton(
+                child: const Text('确定'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      Database database = await openDatabaseConnection();
+      String tableName = "user";
+      Map<String, dynamic> data = {
+        "user": username,
+        "password": generateMd5(username),
+        "zhangtao": zhangtao,
+      };
+      await database.insert(tableName, data);
+      // 重新获取数据并更新UI
+      setState(() {
+        fetchData();
+      });
+      await database.close();
+    }
   }
 
   // 删除数据
-  Future<void> deleteData(int id) async {
-    Database database = await openDatabaseConnection();
-    String tableName = "user";
-    await database.delete(
-      tableName,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-    // 重新获取数据并更新UI
-    setState(() {
-      fetchData();
-    });
-    await database.close();
-  }
 
-  Future<void> updateuser(int id, BuildContext context) async {
-    TextEditingController textEditingController = TextEditingController();
+  Future<void> deleteData(int id) async {
+    TextEditingController oldPasswordController = TextEditingController();
+
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('修改密码'),
-          content: TextField(
-            controller: textEditingController,
-            obscureText: true,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: oldPasswordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: '原密码',
+                ),
+              ),
+            ],
           ),
           actions: [
             TextButton(
@@ -83,9 +92,45 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
             TextButton(
               child: const Text('确认'),
               onPressed: () async {
-                String newpass = textEditingController.text;
-                await performUpdate(id, newpass);
-                Navigator.of(context).pop();
+                String oldPassword = oldPasswordController.text;
+                // 进行原密码验证逻辑，例如与数据库中的密码进行比较
+                if (await verifyOldPassword(
+                    id, oldPassword, c.gsiname.toString())) {
+                  // 原密码验证通过，执行密码更新操作
+                  Database database = await openDatabaseConnection();
+                  String tableName = "user";
+                  await database.delete(
+                    tableName,
+                    where: 'id = ?',
+                    whereArgs: [id],
+                  );
+                  // 重新获取数据并更新UI
+                  setState(() {
+                    fetchData();
+                  });
+                  await database.close();
+                  Navigator.of(context).pop();
+                } else {
+                  // 原密码验证失败，显示错误提示
+                  // ignore: use_build_context_synchronously
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('原密码错误'),
+                        content: const Text('请重新输入正确的原密码。'),
+                        actions: [
+                          ElevatedButton(
+                            child: const Text('确定'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
               },
             ),
           ],
@@ -94,27 +139,81 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
     );
   }
 
-  // 修改数据
-  Future<void> performUpdate(int id, String newpass) async {
-    // 在这里执行实际的更新操作
-    // 使用传入的id和newJflx参数更新数据库中的数据
-    Database database = await openDatabaseConnection();
-    String tableName = "user";
+  Future<void> updateuser(int id, BuildContext context) async {
+    TextEditingController oldPasswordController = TextEditingController();
+    TextEditingController newPasswordController = TextEditingController();
 
-    Map<String, dynamic> updatedData = {
-      "password": generateMd5(newpass),
-    };
-    await database.update(
-      tableName,
-      updatedData,
-      where: 'id = ?',
-      whereArgs: [id],
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('修改密码'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: oldPasswordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: '原密码',
+                ),
+              ),
+              TextField(
+                controller: newPasswordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: '新密码',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: const Text('取消'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('确认'),
+              onPressed: () async {
+                String oldPassword = oldPasswordController.text;
+                String newPassword = newPasswordController.text;
+
+                // 进行原密码验证逻辑，例如与数据库中的密码进行比较
+                if (await verifyOldPassword(
+                    id, oldPassword, c.gsiname.string)) {
+                  // 原密码验证通过，执行密码更新操作
+                  await performUpdate(id, newPassword);
+                  // ignore: use_build_context_synchronously
+                  Navigator.of(context).pop();
+                } else {
+                  // 原密码验证失败，显示错误提示
+                  // ignore: use_build_context_synchronously
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('原密码错误'),
+                        content: const Text('请重新输入正确的原密码。'),
+                        actions: [
+                          ElevatedButton(
+                            child: const Text('确定'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
-    // 重新获取数据并更新UI
-    setState(() {
-      fetchData();
-    });
-    await database.close();
   }
 
 // 刷新数据
@@ -133,32 +232,27 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
     showModalBottomSheet(
       context: itemContext,
       builder: (context) {
-        return Container(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: Icon(Icons.edit),
-                title: Text('修改'),
-                onTap: () {
-                  // 处理修改操作
-                  print('修改' + index.toString());
-                  updateuser(index, itemContext);
-                  Navigator.pop(context); // 关闭弹出菜单
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.delete),
-                title: Text('删除'),
-                onTap: () {
-                  // 处理删除操作
-                  print('删除' + index.toString());
-                  deleteData(index);
-                  Navigator.pop(context); // 关闭弹出菜单
-                },
-              ),
-            ],
-          ),
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('修改'),
+              onTap: () {
+                // 处理修改操作
+                updateuser(index, itemContext);
+                // Navigator.pop(context); // 关闭弹出菜单
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete),
+              title: const Text('删除'),
+              onTap: () {
+                deleteData(index);
+                // Navigator.pop(context); // 关闭弹出菜单
+              },
+            ),
+          ],
         );
       },
     );
@@ -195,67 +289,64 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
                       ),
                       const SizedBox(height: 10),
                       Expanded(
-                        flex: 7,
-                        child: user_dataList.isNotEmpty
-                            ? ListView.builder(
-                                itemCount: user_dataList.length,
-                                itemBuilder: (context, index) {
-                                  return ListTile(
-                                    title: Text(
-                                        'ID: ${user_dataList[index]['id']}--${user_dataList[index]['user']}'),
-                                    subtitle: Text(
-                                        '账套: ${user_dataList[index]['zhangtao']}--${user_dataList[index]['password']}'),
-                                    onTap: () {
-                                      // 处理点击事件
-                                      // 可以在这里进行类型编辑、删除等操作
-                                      handleListItemTap(
-                                          user_dataList[index]['id'], context);
-                                    },
-                                  );
+                          flex: 7,
+                          child: ListView.builder(
+                            itemCount: user_dataList.length,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                title: Text(
+                                    'ID: ${user_dataList[index]['id']}--${user_dataList[index]['user']}'),
+                                subtitle: Text(
+                                    '账套: ${user_dataList[index]['zhangtao']}--${user_dataList[index]['password']}'),
+                                onTap: () {
+                                  // 处理点击事件
+                                  // 可以在这里进行类型编辑、删除等操作
+                                  handleListItemTap(
+                                      user_dataList[index]['id'], context);
                                 },
-                              )
-                            : LayoutBuilder(
-                                builder: (BuildContext context,
-                                    BoxConstraints constraints) {
-                                  final leftWidth = constraints.maxWidth / 2;
-                                  return Container(
-                                    width: leftWidth,
-                                    padding: const EdgeInsets.all(8),
-                                    alignment: Alignment.center,
-                                    child: Column(
-                                      children: [
-                                        const Text(
-                                          '增加用户',
-                                          style: TextStyle(fontSize: 16),
-                                        ),
-                                        const SizedBox(height: 10),
-                                        SizedBox(
-                                          width: leftWidth,
-                                          child: TextField(
-                                            controller: _username,
-                                            decoration: const InputDecoration(
-                                              // hintText: '文本框',
-                                              border: OutlineInputBorder(),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 10),
-                                        SizedBox(
-                                          width: leftWidth,
-                                          child: ElevatedButton(
-                                              onPressed: () {
-                                                // 按钮点击事件处理逻辑
-                                                print(_username.text);
-                                                insertData(_username.text,
-                                                    c.gsiname.toString());
-                                              },
-                                              child: const Text('增加')),
-                                        ),
-                                      ],
+                              );
+                            },
+                          )),
+                      LayoutBuilder(
+                        builder:
+                            (BuildContext context, BoxConstraints constraints) {
+                          final leftWidth = constraints.maxWidth / 2;
+                          return Container(
+                            width: leftWidth,
+                            padding: const EdgeInsets.all(8),
+                            alignment: Alignment.center,
+                            child: Column(
+                              children: [
+                                const Text(
+                                  '增加用户',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                const SizedBox(height: 10),
+                                SizedBox(
+                                  width: leftWidth,
+                                  child: TextField(
+                                    controller: _username,
+                                    decoration: const InputDecoration(
+                                      // hintText: '文本框',
+                                      border: OutlineInputBorder(),
                                     ),
-                                  );
-                                },
-                              ),
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                SizedBox(
+                                  width: leftWidth,
+                                  child: ElevatedButton(
+                                      onPressed: () {
+                                        // 按钮点击事件处理逻辑
+                                        insertData(_username.text,
+                                            c.gsiname.toString());
+                                      },
+                                      child: const Text('增加')),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
