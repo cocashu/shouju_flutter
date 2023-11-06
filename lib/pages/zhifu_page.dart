@@ -3,8 +3,6 @@ import 'package:hy_shouju/main.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
 
 class Type {
   final String name;

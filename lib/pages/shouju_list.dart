@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hy_shouju/models/invoice.dart';
 import 'package:hy_shouju/pages/pdfexport/pdfpreview.dart';
-import 'package:path/path.dart';
+import 'package:hy_shouju/models/mysqlite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class InvoicePage extends StatefulWidget {
@@ -19,12 +19,7 @@ class _InvoicePageState extends State<InvoicePage> {
     fetchData();
   }
 
-  Future<Database> openDatabaseConnection() async {
-    String databasePath = await getDatabasesPath();
-    String databaseFile = join(databasePath, 'my_database.db');
-    return openDatabase(databaseFile);
-  }
-
+// 加载收据列表
   Future<void> fetchData() async {
     Database database = await openDatabaseConnection();
     String tableName = "fkmx";
@@ -35,34 +30,6 @@ class _InvoicePageState extends State<InvoicePage> {
     await database.close();
   }
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: dataList.isNotEmpty
-//           ? ListView.builder(
-//               itemCount: dataList.length,
-//               itemBuilder: (context, index) {
-//                 return ListTile(
-//                   title: Text(dataList[index]['fkdw']),
-//                   subtitle: Text(dataList[index]['fkzy']),
-//                   trailing:
-//                       Text('￥${dataList[index]['jine'].toStringAsFixed(2)}'),
-//                   onTap: () {
-//                     // Navigator.of(context).push(
-//                     //   MaterialPageRoute(
-//                     //     builder: (builder) => PdfPreviewPage(invoice: invoice),
-//                     //   ),
-//                     // );
-//                   },
-//                 );
-//               },
-//             )
-//           : const Center(
-//               child: Text('没有数据'),
-//             ),
-//     );
-//   }
-// }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

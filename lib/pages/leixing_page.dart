@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hy_shouju/main.dart';
 import 'package:get/get.dart';
-import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:hy_shouju/models/mysqlite.dart';
 
 class Type {
   final String name;
@@ -44,11 +44,6 @@ class _TypeManagementPageState extends State<TypeManagementPage> {
   }
 
   List<Map<String, dynamic>> dataList = [];
-  Future<Database> openDatabaseConnection() async {
-    String databasePath = await getDatabasesPath();
-    String databaseFile = join(databasePath, 'my_database.db');
-    return openDatabase(databaseFile);
-  }
 
 //插入数据
   Future<void> insertData(String jflx, String zhangtao) async {
@@ -196,9 +191,6 @@ class _TypeManagementPageState extends State<TypeManagementPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('类型管理'),
-      // ),
       body: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.max,

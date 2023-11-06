@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hy_shouju/main.dart';
-import 'package:printing/printing.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../numbertochinese.dart';
 import 'package:intl/intl.dart';
 import 'package:dropdown_textfield/dropdown_textfield.dart';
-import 'shouju_list.dart';
 import 'package:hy_shouju/pages/pdfexport/pdfpreview.dart';
 import 'package:hy_shouju/models/invoice.dart';
 import 'package:get/get.dart';
-import 'package:path/path.dart';
-// import './pages/ment_data.dart';
-// import './pages/leixing_page.dart';
-
-// void main() => runApp(GetMaterialApp(home: RunMyApp()));//s
+import 'package:hy_shouju/models/mysqlite.dart';
 
 class shouju_page extends StatefulWidget {
   const shouju_page({Key? key}) : super(key: key);
@@ -22,32 +16,6 @@ class shouju_page extends StatefulWidget {
   @override
   // ignore: library_private_types_in_public_api
   _MyCustomFormState createState() => _MyCustomFormState();
-}
-
-Future<Database> openDatabaseConnection() async {
-  String databasePath = await getDatabasesPath();
-  String databaseFile = join(databasePath, 'my_database.db');
-  return openDatabase(databaseFile);
-}
-
-Future<void> insertDataToTable(Invoice invoice) async {
-  Database database = await openDatabaseConnection();
-  await database.insert(
-    'fkmx',
-    {
-      'jflx_id': invoice.fklx_id,
-      'zffs_id': invoice.zffs_id,
-      'user_id': invoice.user_id,
-      'fkzy': invoice.fkzy,
-      'fkdw': invoice.fkdw,
-      'jine': invoice.fkje,
-      'uptime': invoice.fksj,
-      'sjhm': invoice.sjhm,
-      'zhangtao_id': 1, //默认账套
-      'zf_jine': 0, //默认作废金额0
-    },
-  );
-  await database.close();
 }
 
 class _MyCustomFormState extends State<shouju_page> {
@@ -74,37 +42,11 @@ class _MyCustomFormState extends State<shouju_page> {
     super.initState();
   }
 
-  Future<Database> openDatabaseConnection() async {
-    String databasePath = await getDatabasesPath();
-    String databaseFile = join(databasePath, 'my_database.db');
-    return openDatabase(databaseFile);
-  }
-
-  //查询某类型收据最大编号
-  Future<String> getMaxSjhm(int jflxId, int zhangtao) async {
-    // 打开数据库连接
-    Database db = await openDatabaseConnection();
-    // 执行查询
-    List<Map<String, dynamic>> result = await db.rawQuery(
-      'SELECT max(id),sjhm FROM fkmx WHERE jflx_id = ? AND zhangtao_id = ?',
-      [jflxId, zhangtao],
-    );
-    // 关闭数据库连接
-    await db.close();
-    // 提取结果
-    String maxSjhm =
-        result[0]['sjhm'] != null ? result[0]['sjhm'].toString() : '0';
-    // print('函数内部输出' + maxSjhm);
-    return maxSjhm;
-  }
-
 // 加载缴费类型
   Future<List<DropDownValueModel>> jflx_loadData() async {
     Database database = await openDatabaseConnection();
     String tableName = "jflx";
-
     List<Map<String, dynamic>> result = await database.query(tableName);
-
     List<DropDownValueModel> dataList = result.map((row) {
       String name = row['jflx'];
       String value = row['id'].toString();
@@ -112,7 +54,6 @@ class _MyCustomFormState extends State<shouju_page> {
     }).toList();
     // print(dataList.toString());
     await database.close();
-
     return dataList;
   }
 
@@ -120,9 +61,7 @@ class _MyCustomFormState extends State<shouju_page> {
   Future<List<DropDownValueModel>> zffs_loadData() async {
     Database database = await openDatabaseConnection();
     String tableName = "zffs";
-
     List<Map<String, dynamic>> result = await database.query(tableName);
-
     List<DropDownValueModel> zffs_dataList = result.map((row) {
       String name = row['zffs'];
       String value = row['id'].toString();
@@ -130,7 +69,6 @@ class _MyCustomFormState extends State<shouju_page> {
     }).toList();
     // print(dataList.toString());
     await database.close();
-
     return zffs_dataList;
   }
 
@@ -143,10 +81,6 @@ class _MyCustomFormState extends State<shouju_page> {
     super.dispose();
   }
 
-  selectChange(value) {
-    print("值改变了：$value");
-  }
-
   @override
   Widget build(context) {
     final String currentDate =
@@ -157,9 +91,6 @@ class _MyCustomFormState extends State<shouju_page> {
     // 使用Get.put()实例化你的类，使其对当下的所有子路由可用。
 
     return Scaffold(
-//全嵌套形式下不需要appbar
-      // appBar: AppBar(
-      //     title: Obx(() => Center(child: Text("鸿宇集团【 ${c.gsiname}】收费专用")))),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
@@ -230,15 +161,14 @@ class _MyCustomFormState extends State<shouju_page> {
                         dropDownList: dataList,
                         onChanged: (val) async {
                           //需要查询当前类型下面有多少数据
-                          int count = int.parse(val.value);
-                          Future<String?> myFuture = getMaxSjhm(count, 1);
-                          String? result = await myFuture;
-                          sjhmText.value =
-                              (int.parse(result.toString()) + 1).toString() ??
-                                  '0';
-                          String _sjhmstr =
-                              '${val.value.padLeft(2, '0')}-${sjhmText.value.padLeft(8, '0')}';
-                          _sjhm.text = _sjhmstr;
+                          int result = int.parse(val.value);
+                          String sjhm = await queryBysjhm(result, 1);
+                          int sjhmInt = int.parse(sjhm);
+                          int incrementedSjhm = sjhmInt + 1;
+                          String resultString = incrementedSjhm.toString();
+                          sjhmText.value = resultString;
+                          _sjhm.text =
+                              '${val.value.toString().padLeft(2, '0')}-${resultString.padLeft(8, '0')}';
                         },
                       );
                     } else {
