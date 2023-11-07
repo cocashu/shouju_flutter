@@ -292,14 +292,13 @@ class _TypeManagementPageState extends State<TypeManagementPage> {
                                   ),
                                 ),
                                 const SizedBox(height: 10),
-                                const SizedBox(height: 10),
                                 SizedBox(
                                   width: leftWidth,
                                   child: ElevatedButton(
                                     onPressed: () {
                                       // 按钮点击事件处理逻辑
                                       insertData(_jiaofeileixing.text,
-                                          c.gsiname.toString());
+                                          c.gsname.toString());
                                     }, // 当密码不正确时禁用按钮
                                     child: const Text('增加'),
                                   ),

@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import 'invoice.dart';
@@ -18,6 +20,29 @@ Future<Database> openDatabaseConnection() async {
   return openDatabase(databaseFile);
 }
 
+// 判断zt表中是否有数据
+Future<bool> isExistData(String tableName) async {
+  Database database = await openDatabaseConnection();
+  List<Map<String, dynamic>> result = await database.rawQuery(
+    'SELECT * FROM $tableName',
+  );
+  await database.close();
+  if (result.isNotEmpty) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+//查询账套表
+Future<List<Map<String, dynamic>>> queryZtTable() async {
+  Database database = await openDatabaseConnection();
+  List<Map<String, dynamic>> result =
+      await database.query('zt', columns: ['id', 'zhangtao', 'gsname']);
+  await database.close();
+  return result;
+}
+
 //保存收据
 Future<void> insertDataToTable(Invoice invoice) async {
   Database database = await openDatabaseConnection();
@@ -32,7 +57,7 @@ Future<void> insertDataToTable(Invoice invoice) async {
       'jine': invoice.fkje,
       'uptime': invoice.fksj,
       'sjhm': invoice.sjhm,
-      'zhangtao_id': 1, //默认账套
+      'zhangtao_id': invoice.ztid, //默认账套
       'zf_jine': 0, //默认作废金额0
     },
   );
@@ -72,11 +97,11 @@ Future<String> queryById(int id, String tableName, String zhangTao) async {
 }
 
 //用于判断用户密码
-Future<String> queryBypass(String user, String zhangTao) async {
+Future<String> queryBypass(String user) async {
   Database database = await openDatabaseConnection();
   List<Map<String, dynamic>> result = await database.rawQuery(
-    'SELECT password FROM user WHERE user = ? AND zhangTao = ?',
-    [user, zhangTao],
+    'SELECT password FROM user WHERE user = ?',
+    [user],
   );
   await database.close();
 
@@ -124,6 +149,20 @@ Future<bool> verifyOldPassword(
   await database.close();
 
   return generateMd5(oldPassword) == result.first['password'];
+}
+// 查询用户id
+
+Future<int> getUserIdByUsername(String username) async {
+  Database database = await openDatabaseConnection();
+  List<Map<String, dynamic>> result = await database.query('user',
+      columns: ['id'], where: 'user = ?', whereArgs: [username]);
+  await database.close();
+
+  if (result.isNotEmpty) {
+    return result[0]['id'];
+  } else {
+    return -1; // 返回一个负数表示未找到用户
+  }
 }
 
 // 修改数据

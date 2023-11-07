@@ -67,10 +67,11 @@ void main() async {
 }
 
 class Controller extends GetxController {
-  var userid = 0.obs; //出纳
-  var username = 'jie'.obs; //出纳
-  var gsiname = 'HY商贸'.obs; //公司简称
-  var gsinameall = 'ABCD市HY商贸有限责任公司'.obs; //公司全称
+  var user_id = 0.obs; //出纳ID
+  var username = ''.obs; //出纳
+  var gsname = ''.obs; //公司简称
+  var gsnameall = ''.obs; //公司全称
+  var zhangtao_id = 0.obs;
 }
 
 class RunMyApp extends StatelessWidget {

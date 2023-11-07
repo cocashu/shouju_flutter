@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:hy_shouju/pages/leixing_page.dart';
 import 'package:hy_shouju/pages/shouju.dart';
 import 'package:hy_shouju/pages/shujubak.dart';
+import 'package:hy_shouju/pages/baobiao.dart';
 
 class MyCustomForm extends StatefulWidget {
   const MyCustomForm({Key? key}) : super(key: key);
@@ -41,7 +42,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
 
   @override
   Widget build(context) {
-    titlestr.value = "鸿宇集团【 ${c.gsiname}】收费专用---开具收据";
+    titlestr.value = "鸿宇集团【 ${c.gsname}】收费专用---开具收据";
 
     return Scaffold(
       appBar: AppBar(title: Obx(() => Center(child: Text(titlestr.value)))),
@@ -98,10 +99,20 @@ class _MyCustomFormState extends State<MyCustomForm> {
             ),
             items: [
               SideMenuItem(
+                title: '主页',
+                onTap: (index, _) {
+                  sideMenu.changePage(index);
+                  titlestr.value = "鸿宇集团【 ${c.gsname}】收费专用---开具收据";
+                  // Get.to(shouju_page());
+                },
+                icon: const Icon(Icons.home),
+                tooltipContent: "This is a tooltip for Dashboard item",
+              ),
+              SideMenuItem(
                 title: '收据开具',
                 onTap: (index, _) {
                   sideMenu.changePage(index);
-                  titlestr.value = "鸿宇集团【 ${c.gsiname}】收费专用---开具收据";
+                  titlestr.value = "鸿宇集团【 ${c.gsname}】收费专用---开具收据";
                   // Get.to(shouju_page());
                 },
                 icon: const Icon(Icons.home),
@@ -111,7 +122,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 title: '收据列表',
                 onTap: (index, _) {
                   sideMenu.changePage(index);
-                  titlestr.value = "鸿宇集团【 ${c.gsiname}】收费专用---收据列表";
+                  titlestr.value = "鸿宇集团【 ${c.gsname}】收费专用---收据列表";
                 },
                 icon: const Icon(Icons.list),
                 tooltipContent: "This is a tooltip for Dashboard item",
@@ -120,7 +131,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 title: '用户管理',
                 onTap: (index, _) {
                   sideMenu.changePage(index);
-                  titlestr.value = "鸿宇集团【 ${c.gsiname}】收费专用---用户管理";
+                  titlestr.value = "鸿宇集团【 ${c.gsname}】收费专用---用户管理";
                 },
                 icon: const Icon(Icons.supervisor_account),
               ),
@@ -128,7 +139,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 title: '数据备份',
                 onTap: (index, _) {
                   sideMenu.changePage(index);
-                  titlestr.value = "鸿宇集团【 ${c.gsiname}】收费专用---数据备份";
+                  titlestr.value = "鸿宇集团【 ${c.gsname}】收费专用---数据备份";
                 },
                 icon: const Icon(Icons.file_copy_rounded),
                 trailing: Container(
@@ -145,10 +156,10 @@ class _MyCustomFormState extends State<MyCustomForm> {
                     )),
               ),
               SideMenuItem(
-                title: '下载数据',
+                title: '收据报表',
                 onTap: (index, _) {
                   sideMenu.changePage(index);
-                  titlestr.value = "鸿宇集团【 ${c.gsiname}】收费专用---下载数据";
+                  titlestr.value = "鸿宇集团【 ${c.gsname}】收费专用---收据报表";
                 },
                 icon: const Icon(Icons.download),
               ),
@@ -164,7 +175,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 title: '缴费类型管理',
                 onTap: (index, _) {
                   sideMenu.changePage(index);
-                  titlestr.value = "鸿宇集团【 ${c.gsiname}】收费专用---缴费类型管理";
+                  titlestr.value = "鸿宇集团【 ${c.gsname}】收费专用---缴费类型管理";
                   // Get.to(TypeManagementPage());
                 },
                 icon: const Icon(Icons.settings),
@@ -173,7 +184,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 title: '支付方式管理',
                 onTap: (index, _) {
                   sideMenu.changePage(index);
-                  titlestr.value = "鸿宇集团【 ${c.gsiname}】收费专用--支付方式管理";
+                  titlestr.value = "鸿宇集团【 ${c.gsname}】收费专用--支付方式管理";
                   // Get.to(zffs_TypeManagementPage());
                 },
                 icon: const Icon(Icons.settings),
@@ -182,7 +193,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 title: '软件设置',
                 onTap: (index, _) {
                   sideMenu.changePage(index);
-                  titlestr.value = "鸿宇集团【 ${c.gsiname}】收费专用--软件设置";
+                  titlestr.value = "鸿宇集团【 ${c.gsname}】收费专用--软件设置";
                 },
                 icon: const Icon(Icons.settings),
               ),
@@ -196,6 +207,15 @@ class _MyCustomFormState extends State<MyCustomForm> {
             child: PageView(
               controller: pageController,
               children: [
+                Container(
+                  color: Colors.white,
+                  child: const Center(
+                    child: Text(
+                      '开屏通知',
+                      style: TextStyle(fontSize: 35),
+                    ),
+                  ),
+                ),
                 Container(color: Colors.white, child: const shouju_page()),
                 Container(color: Colors.white, child: InvoicePage()),
                 Container(
@@ -208,12 +228,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 ),
                 Container(
                   color: Colors.white,
-                  child: const Center(
-                    child: Text(
-                      'Download',
-                      style: TextStyle(fontSize: 35),
-                    ),
-                  ),
+                  child: const MyAppbiaobiaoPage(),
                 ),
                 Container(
                   color: Colors.white,

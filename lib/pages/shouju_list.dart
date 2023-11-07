@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:hy_shouju/models/invoice.dart';
 import 'package:hy_shouju/pages/pdfexport/pdfpreview.dart';
@@ -47,6 +49,7 @@ class _InvoicePageState extends State<InvoicePage> {
                   fkje: data['jine'],
                   fksj: data['uptime'],
                   sjhm: data['sjhm'], // 根据你的实际情况进行修改
+                  ztid: data['zhangtao_id'],
                 );
                 return ListTile(
                   title: Text(invoice.fkdw),

@@ -165,7 +165,7 @@ Future<Uint8List> makePdf(Invoice invoice) async {
                 ),
                 Row(children: [
                   Text(
-                    ' 单位盖章：${c.gsinameall}',
+                    ' 单位盖章：${c.gsnameall}',
                     style: TextStyle(font: ttf, fontSize: 10),
                   ),
                 ]),

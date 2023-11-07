@@ -95,7 +95,7 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
                 String oldPassword = oldPasswordController.text;
                 // 进行原密码验证逻辑，例如与数据库中的密码进行比较
                 if (await verifyOldPassword(
-                    id, oldPassword, c.gsiname.toString())) {
+                    id, oldPassword, c.gsname.toString())) {
                   // 原密码验证通过，执行密码更新操作
                   Database database = await openDatabaseConnection();
                   String tableName = "user";
@@ -181,8 +181,7 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
                 String newPassword = newPasswordController.text;
 
                 // 进行原密码验证逻辑，例如与数据库中的密码进行比较
-                if (await verifyOldPassword(
-                    id, oldPassword, c.gsiname.string)) {
+                if (await verifyOldPassword(id, oldPassword, c.gsname.string)) {
                   // 原密码验证通过，执行密码更新操作
                   await performUpdate(id, newPassword);
                   // ignore: use_build_context_synchronously
@@ -339,7 +338,7 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
                                       onPressed: () {
                                         // 按钮点击事件处理逻辑
                                         insertData(_username.text,
-                                            c.gsiname.toString());
+                                            c.gsname.toString());
                                       },
                                       child: const Text('增加')),
                                 ),

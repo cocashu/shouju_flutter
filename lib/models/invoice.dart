@@ -7,6 +7,7 @@ class Invoice {
   final double fkje;
   final String fksj;
   final String sjhm;
+  final int ztid;
 
   Invoice({
     required this.fklx_id,
@@ -17,5 +18,6 @@ class Invoice {
     required this.fkje,
     required this.fksj,
     required this.sjhm,
+    required this.ztid,
   });
 }

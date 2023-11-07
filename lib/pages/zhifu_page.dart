@@ -297,7 +297,7 @@ class _TypeManagementPageState extends State<zffs_TypeManagementPage> {
                                       // 按钮点击事件处理逻辑
                                       print(_zhifuleixing.text);
                                       insertData(_zhifuleixing.text,
-                                          c.gsiname.toString());
+                                          c.gsname.toString());
                                     }, // 当密码不正确时禁用按钮
                                     child: const Text('增加'),
                                   ),
