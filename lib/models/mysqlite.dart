@@ -1,10 +1,14 @@
 import 'dart:ffi';
 
+import 'package:get/get.dart';
+import 'package:hy_shouju/main.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import 'invoice.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+
+final Controller c = Get.put(Controller());
 
 //MD5
 String generateMd5(String input) {
@@ -127,10 +131,10 @@ Future<bool> checkUsernameDuplicate(String username) async {
 }
 
 //查询user 表中ID为1 的密码
-Future<String> queryPassword() async {
+Future<String> queryPassword(int id) async {
   Database database = await openDatabaseConnection();
   String tableName = "user";
-  var result = await database.query(tableName, where: 'id =?', whereArgs: [1]);
+  var result = await database.query(tableName, where: 'id =?', whereArgs: [id]);
   if (result.isNotEmpty) {
     return result.first['password'].toString();
   } else {
@@ -138,7 +142,8 @@ Future<String> queryPassword() async {
   }
 }
 
-// 验证密码是否正确
+//验证密码是否正确
+
 Future<bool> verifyOldPassword(
     int id, String oldPassword, String zhangtao) async {
   Database database = await openDatabaseConnection();
@@ -187,4 +192,66 @@ Future<void> performUpdate(int id, String newpass) async {
   //   fetchData();
   // });
   await database.close();
+}
+
+// 作废收据
+void modifyData(int fklxid, String sjhm) async {
+  Database database = await openDatabaseConnection();
+  // 执行数据库更新操作
+  await database.execute('''
+    UPDATE fkmx
+    SET zf_jine = jine, jine = 0.00
+    WHERE jflx_id = $fklxid AND sjhm = '$sjhm'
+  ''');
+  // 关闭数据库连接
+  await database.close();
+}
+
+void unmodifyData(int fklxid, String sjhm) async {
+  Database database = await openDatabaseConnection();
+  // 执行数据库更新操作
+  await database.execute('''
+    UPDATE fkmx
+    SET jine = zf_jine, zf_jine = 0.00
+    WHERE jflx_id = $fklxid AND sjhm = '$sjhm'
+  ''');
+  // 关闭数据库连接
+  await database.close();
+}
+
+//保存配置到数据库
+Future<void> updateSettings() async {
+  Database database = await openDatabaseConnection();
+
+  try {
+    await database.transaction((txn) async {
+      await txn.rawUpdate(
+        'UPDATE setting SET value = ? WHERE name = ?',
+        [c.topMargin.value.toStringAsFixed(2), 'topMargin'],
+      );
+      await txn.rawUpdate(
+        'UPDATE setting SET value = ? WHERE name = ?',
+        [c.leftMargin.value.toStringAsFixed(2), 'leftMargin'],
+      );
+      await txn.rawUpdate(
+        'UPDATE setting SET value = ? WHERE name = ?',
+        [c.rightMargin.value.toStringAsFixed(2), 'rightMargin'],
+      );
+    });
+  } catch (e) {
+    print('错误: $e');
+  } finally {
+    await database.close();
+  }
+}
+
+//读取配置到数据库
+Future<List<Map<String, dynamic>>> readFromSettingsTable() async {
+  Database database = await openDatabaseConnection();
+  // 执行数据库查询操作
+  List<Map<String, dynamic>> results = await database.query('setting');
+  // 关闭数据库连接
+  await database.close();
+  // 返回查询结果
+  return results;
 }

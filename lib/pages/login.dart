@@ -25,24 +25,37 @@ class _LoginPageState extends State<LoginPage> {
     void processZtTableData() async {
       List<Map<String, dynamic>> queryResult = await queryZtTable();
       for (var result in queryResult) {
-        String gsname = result['gsname'];
-        String zhangtao = result['zhangtao'];
-        int zhangtaoId = result['id'];
-
         // 在这里使用变量 gsname、zhangtao 和 zhangtaoId 进行后续处理
         // 例如，将它们赋值给 c.gsname、c.zhangtao 和 c.zhangtao_id
-        c.gsname.value = zhangtao;
-        c.gsnameall.value = gsname;
-        c.zhangtao_id.value = zhangtaoId;
-        print('账套信息已加载');
+        c.gsname.value = result['zhangtao'];
+        c.gsnameall.value = result['gsname'];
+        c.zhangtaoid.value = result['id'];
       }
+      print('账套信息已加载');
+    }
+
+    List<Map<String, dynamic>> results = await readFromSettingsTable();
+    // 处理查询结果
+    for (var result in results) {
+      String name = result['name'];
+      String value = result['value'];
+
+      // 根据name进行区分赋值
+      if (name == 'topMargin') {
+        c.topMargin.value = double.parse(value);
+      } else if (name == 'leftMargin') {
+        c.leftMargin.value = double.parse(value);
+      } else if (name == 'rightMargin') {
+        c.rightMargin.value = double.parse(value);
+      }
+      print('设置信息已加载');
     }
 
     void assignUserIdToC() async {
       String username = _usernameController.text;
       c.username.value = _usernameController.text;
       int userId = await getUserIdByUsername(username);
-      c.user_id.value = userId;
+      c.userid.value = userId;
       print('用户信息已加载');
     }
 
@@ -118,12 +131,6 @@ class _LoginPageState extends State<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.max,
               children: [
-                // ElevatedButton(
-                //   child: const Text('登录'),
-                //   onPressed: () {
-                //     _login();
-                //   },
-                // ),
                 SizedBox(
                   width: 200,
                   height: 50,
@@ -151,14 +158,21 @@ class _LoginPageState extends State<LoginPage> {
                         Get.to(const MychushiPage());
                       }
                     },
-                    child: Text(
-                      myBool.value ? '账套初始化' : '账套已建立',
-                      style: const TextStyle(
-                        fontSize: 25,
-                      ),
-                    ),
+                    child: myBool.value
+                        ? const Text(
+                            '账套初始化',
+                            style: TextStyle(
+                              fontSize: 25,
+                            ),
+                          )
+                        : const Text(
+                            '账套已建立',
+                            style: TextStyle(
+                              fontSize: 25,
+                            ),
+                          ),
                   ),
-                ),
+                )
               ],
             )
           ],

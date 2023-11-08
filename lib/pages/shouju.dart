@@ -373,13 +373,13 @@ class _MyCustomFormState extends State<shouju_page> {
                       Invoice invoice = Invoice(
                         fklx_id: int.parse(_fklx.dropDownValue!.value),
                         zffs_id: int.parse(_fkfs.dropDownValue!.value),
-                        user_id: c.user_id.value,
+                        user_id: c.userid.value,
                         fkdw: _fkdw.text,
                         fkzy: _fkzy.text,
                         fkje: double.parse(_jine.text) ?? 0,
                         fksj: DateTime.now().toString(),
                         sjhm: sjhmText.value,
-                        ztid: c.zhangtao_id.value,
+                        ztid: c.zhangtaoid.value,
                       );
                       insertDataToTable(invoice);
                       Navigator.push(
@@ -389,13 +389,13 @@ class _MyCustomFormState extends State<shouju_page> {
                             invoice: Invoice(
                               fklx_id: int.parse(_fklx.dropDownValue!.value),
                               zffs_id: int.parse(_fkfs.dropDownValue!.value),
-                              user_id: c.user_id.value,
+                              user_id: c.userid.value,
                               fkdw: _fkdw.text,
                               fkzy: _fkzy.text,
                               fkje: double.parse(_jine.text) ?? 0,
                               fksj: DateTime.now().toString(),
-                              sjhm: _sjhm.text,
-                              ztid: c.zhangtao_id.value,
+                              sjhm: sjhmText.value,
+                              ztid: c.zhangtaoid.value,
                             ),
                           ),
                         ),

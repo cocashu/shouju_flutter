@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hy_shouju/main.dart';
+import 'package:hy_shouju/pages/login.dart';
+import 'package:hy_shouju/pages/settings.dart';
 import 'package:hy_shouju/pages/zhifu_page.dart';
 import 'package:easy_sidemenu/easy_sidemenu.dart';
 import 'package:hy_shouju/pages/shouju_list.dart';
@@ -197,8 +200,12 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 },
                 icon: const Icon(Icons.settings),
               ),
-              const SideMenuItem(
+              SideMenuItem(
                 title: '退出',
+                onTap: (index, _) {
+                  // 退出应用程序
+                  Get.off(const LoginPage());
+                },
                 icon: Icon(Icons.exit_to_app),
               ),
             ],
@@ -253,9 +260,13 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 ),
                 Container(
                   color: Colors.white,
+                  child: Center(child: MarginSettingsPage()),
+                ),
+                Container(
+                  color: Colors.white,
                   child: const Center(
                     child: Text(
-                      'Settings',
+                      'exit',
                       style: TextStyle(fontSize: 35),
                     ),
                   ),

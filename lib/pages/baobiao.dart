@@ -93,7 +93,7 @@ class _MyAppbiaobiaoPageState extends State<MyAppbiaobiaoPage> {
                                     int dataIndex = index - 2;
                                     return ListTile(
                                       title: Text(
-                                          '分类：${dataList[dataIndex]['jflx']}'),
+                                          '缴费分类：${dataList[dataIndex]['jflx']}'),
                                       subtitle: Text(
                                           '账套: ${dataList[dataIndex]['zhangtao']}'),
                                       onTap: () {
@@ -106,7 +106,7 @@ class _MyAppbiaobiaoPageState extends State<MyAppbiaobiaoPage> {
                                     int zffsIndex = index - dataList.length - 2;
                                     return ListTile(
                                       title: Text(
-                                          '分类：${zffs_dataList[zffsIndex]['zffs']}'),
+                                          '支付方式：${zffs_dataList[zffsIndex]['zffs']}'),
                                       subtitle: Text(
                                           '账套: ${zffs_dataList[zffsIndex]['zhangtao']}'),
                                       onTap: () {

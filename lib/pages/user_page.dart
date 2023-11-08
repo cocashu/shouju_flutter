@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:hy_shouju/main.dart';
 import 'package:get/get.dart';
@@ -25,7 +27,6 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
     bool isUsernameDuplicate = await checkUsernameDuplicate(username);
 
     if (isUsernameDuplicate) {
-      // ignore: use_build_context_synchronously
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -64,12 +65,12 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
 
   Future<void> deleteData(int id) async {
     TextEditingController oldPasswordController = TextEditingController();
-
+    String result = await queryPassword(id);
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('修改密码'),
+          title: const Text('删除用户'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -93,26 +94,40 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
               child: const Text('确认'),
               onPressed: () async {
                 String oldPassword = oldPasswordController.text;
+
                 // 进行原密码验证逻辑，例如与数据库中的密码进行比较
-                if (await verifyOldPassword(
-                    id, oldPassword, c.gsname.toString())) {
+                if (generateMd5(oldPassword) == result) {
                   // 原密码验证通过，执行密码更新操作
                   Database database = await openDatabaseConnection();
+                  // 判断有无关联数据
+                  int count = await database.rawQuery(
+                    'SELECT COUNT(*) FROM fkmx WHERE user_id = ?',
+                    [id],
+                  ).then((value) => value.first.values.first as int);
                   String tableName = "user";
-                  await database.delete(
-                    tableName,
-                    where: 'id = ?',
-                    whereArgs: [id],
-                  );
-                  // 重新获取数据并更新UI
-                  setState(() {
-                    fetchData();
-                  });
+                  if (count == 0) {
+                    await database.delete(
+                      tableName,
+                      where: 'id = ?',
+                      whereArgs: [id],
+                    );
+                    // 重新获取数据并更新UI
+                    setState(() {
+                      fetchData();
+                    });
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('错误提示:该数据仍有关联的记录，无法删除。'),
+                        backgroundColor: Colors.red, // 设置背景色为红色
+                      ),
+                    );
+                    Navigator.of(context).pop();
+                  }
                   await database.close();
                   Navigator.of(context).pop();
                 } else {
                   // 原密码验证失败，显示错误提示
-                  // ignore: use_build_context_synchronously
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
@@ -142,7 +157,7 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
   Future<void> updateuser(int id, BuildContext context) async {
     TextEditingController oldPasswordController = TextEditingController();
     TextEditingController newPasswordController = TextEditingController();
-
+    String result = await queryPassword(id);
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -181,14 +196,12 @@ class _TypeManagementPageState extends State<user_TypeManagementPage> {
                 String newPassword = newPasswordController.text;
 
                 // 进行原密码验证逻辑，例如与数据库中的密码进行比较
-                if (await verifyOldPassword(id, oldPassword, c.gsname.string)) {
+                if (generateMd5(oldPassword) == result) {
                   // 原密码验证通过，执行密码更新操作
                   await performUpdate(id, newPassword);
-                  // ignore: use_build_context_synchronously
                   Navigator.of(context).pop();
                 } else {
                   // 原密码验证失败，显示错误提示
-                  // ignore: use_build_context_synchronously
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {

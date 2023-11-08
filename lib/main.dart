@@ -61,17 +61,28 @@ void main() async {
         sjhm        TEXT
       )
     ''');
+    // 创建 "设置" 表
+    await db.execute('''
+      CREATE TABLE setting (
+        id INTEGER PRIMARY KEY,
+        name TEXT,
+        value TEXT
+      )
+    ''');
   });
 
   runApp(const GetMaterialApp(home: RunMyApp()));
 }
 
 class Controller extends GetxController {
-  var user_id = 0.obs; //出纳ID
+  var userid = 0.obs; //出纳ID
   var username = ''.obs; //出纳
   var gsname = ''.obs; //公司简称
   var gsnameall = ''.obs; //公司全称
-  var zhangtao_id = 0.obs;
+  var zhangtaoid = 0.obs;
+  var topMargin = 10.0.obs;
+  var leftMargin = 50.0.obs;
+  var rightMargin = 50.0.obs;
 }
 
 class RunMyApp extends StatelessWidget {

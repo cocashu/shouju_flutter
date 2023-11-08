@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:hy_shouju/main.dart';
 import 'package:hy_shouju/models/invoice.dart';
 import 'package:intl/intl.dart';
+import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:printing/printing.dart';
@@ -18,20 +20,30 @@ Future<Uint8List> makePdf(Invoice invoice) async {
   final Controller c = Get.put(Controller());
   final plainText =
       '${invoice.fksj}-${invoice.fklx_id}-${invoice.zffs_id}-${invoice.fkje}';
-  final key = Key.fromUtf8('EGHTHLaHzA8bQNXH6JIy2GHUuRP6M6Vr');
+  final key = Key.fromUtf8('EGHTHLaHzA8bQNXH6JIy2GHUuRP6M6Vr'); //密钥
   final iv = IV.fromLength(16);
   final encrypter = Encrypter(AES(key));
   final encrypted = encrypter.encrypt(plainText, iv: iv);
   // final decrypted = encrypter.decrypt(encrypted, iv: iv); //解密
-  final jflx = await queryById(invoice.fklx_id, 'jflx', 'HY商贸');
-  final zffs = await queryById(invoice.zffs_id, 'zffs', 'HY商贸');
-  final user = await queryById(invoice.user_id, 'user', 'HY商贸');
+  final jflx = await queryById(invoice.fklx_id, 'jflx', c.gsname.value);
+  final zffs = await queryById(invoice.zffs_id, 'zffs', c.gsname.value);
+  final user = await queryById(invoice.user_id, 'user', c.gsname.value);
+
+  const PdfColor redColor = PdfColor.fromInt(0xFF0000);
   final imageLogo = MemoryImage(
       (await rootBundle.load('assets/logo.png')).buffer.asUint8List());
   final ttf =
       await fontFromAssetBundle('fonts/NotoSansSC-VariableFont_wght.ttf');
   pdf.addPage(
     Page(
+      pageTheme: PageTheme(
+        margin: EdgeInsets.only(
+          top: c.topMargin.value, // 设置上边距
+          left: c.leftMargin.value, // 设置左边距
+          right: c.rightMargin.value, // 设置右边距
+          // bottom: 570,
+        ),
+      ),
       build: (context) {
         return Column(
           children: [
@@ -58,11 +70,12 @@ Future<Uint8List> makePdf(Invoice invoice) async {
                 Container(
                     padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
-                        border: Border.all(),
-                        borderRadius: const BorderRadius.only(
-                            // bottomRight: Radius.circular(30),
-                            // bottomLeft: Radius.circular(30)
-                            )),
+                      border: Border.all(),
+                      // borderRadius: const BorderRadius.only( // 单独设置每个角
+                      //     topRight: Radius.circular(10),
+                      //     bottomLeft: Radius.circular(10))),
+                      borderRadius: BorderRadius.circular(10), // 设置四个角为圆角，半径为10
+                    ), // 设置四个角为圆角，半径为10
                     height: 50,
                     width: 120,
                     child: Wrap(
@@ -81,108 +94,138 @@ Future<Uint8List> makePdf(Invoice invoice) async {
               ],
             ),
             Container(height: 5),
-            Container(
-              width: 600,
-              height: 180,
-              decoration: BoxDecoration(
-                border: Border.all(),
+            Stack(children: [
+              Positioned(
+                  top: 50,
+                  left: 200,
+                  child: Transform.rotate(
+                    angle: 45 * 3.14159 / 180, // 将角度转换为弧度
+                    child: invoice.fkje == 0
+                        ? Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                width: 2, // 边框宽度
+                                color: redColor, // 边框颜色
+                              ),
+                            ),
+                            // width: calculateStringWidth('覆盖内容', 24),
+                            // height: 50,
+                            child: Text(
+                              ' 收据作废 ',
+                              style: TextStyle(
+                                font: ttf,
+                                fontSize: 24,
+                                color: redColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          )
+                        : SizedBox(),
+                  )),
+              Container(
+                width: 600,
+                height: 180,
+                decoration: BoxDecoration(
+                  border: Border.all(),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Column(children: [
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Row(children: [
+                    SizedBox(
+                      width: 30,
+                    ),
+                    Text(
+                      '今收到${invoice.fkdw}',
+                      style: TextStyle(font: ttf, fontSize: 12),
+                    ),
+                    Container(
+                        width: 310 -
+                            (calculateStringWidth(
+                                invoice.fkdw, 12))), //计算字符串长度，以保证相对位置稳定
+                    Text(
+                      // '收费类型:${invoice.fklx_id}',
+                      '收费类型:$jflx',
+                      style: TextStyle(font: ttf, fontSize: 12),
+                    ),
+                  ]),
+                  Divider(
+                    //虚线
+                    height: 1,
+                    borderStyle: BorderStyle.dashed,
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Row(children: [
+                    Text(
+                      ' 摘由:${invoice.fkzy}',
+                      style: TextStyle(font: ttf, fontSize: 12),
+                    ),
+                    Container(
+                        width: 350 -
+                            (calculateStringWidth(
+                                invoice.fkzy, 12))), //计算字符串长度，以保证相对位置稳定
+                    Text(
+                      '收费类型:$zffs',
+                      style: TextStyle(font: ttf, fontSize: 12),
+                    ),
+                  ]),
+                  Divider(
+                    //虚线
+                    height: 1,
+                    borderStyle: BorderStyle.dashed,
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Row(children: [
+                    Text(
+                      ' 人民币:${convertToChineseMoney(invoice.fkje.toStringAsFixed(2))}',
+                      style: TextStyle(font: ttf, fontSize: 12),
+                    ),
+                    Container(
+                        width: 320 -
+                            (calculateStringWidth(
+                                convertToChineseMoney(
+                                    invoice.fkje.toStringAsFixed(2)),
+                                12))), //计算字符串长度，以保证相对位置稳定
+                    Text(
+                      '(小写：${invoice.fkje.toStringAsFixed(2)})',
+                      style: TextStyle(font: ttf, fontSize: 12),
+                    ),
+                  ]),
+                  Divider(
+                    //虚线
+                    height: 1,
+                    borderStyle: BorderStyle.dashed,
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Row(children: [
+                    Text(
+                      ' 单位盖章：${c.gsnameall}',
+                      style: TextStyle(font: ttf, fontSize: 10),
+                    ),
+                  ]),
+                  Row(children: [
+                    SizedBox(
+                      width: 300,
+                    ),
+                    SizedBox(
+                      height: 40,
+                    ),
+                    Text(
+                      ' 交款人签字：',
+                      style: TextStyle(font: ttf, fontSize: 10),
+                    ),
+                  ]),
+                ]),
               ),
-              child: Column(children: [
-                SizedBox(
-                  height: 8,
-                ),
-                Row(children: [
-                  SizedBox(
-                    width: 30,
-                  ),
-                  Text(
-                    '今收到${invoice.fkdw}',
-                    style: TextStyle(font: ttf, fontSize: 12),
-                  ),
-                  Container(
-                      width: 310 -
-                          (calculateStringWidth(
-                              invoice.fkdw, 12))), //计算字符串长度，以保证相对位置稳定
-                  Text(
-                    // '收费类型:${invoice.fklx_id}',
-                    '收费类型:$jflx',
-                    style: TextStyle(font: ttf, fontSize: 12),
-                  ),
-                ]),
-                Divider(
-                  //虚线
-                  height: 1,
-                  borderStyle: BorderStyle.dashed,
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Row(children: [
-                  Text(
-                    ' 摘由:${invoice.fkzy}',
-                    style: TextStyle(font: ttf, fontSize: 12),
-                  ),
-                  Container(
-                      width: 350 -
-                          (calculateStringWidth(
-                              invoice.fkzy, 12))), //计算字符串长度，以保证相对位置稳定
-                  Text(
-                    '收费类型:$zffs',
-                    style: TextStyle(font: ttf, fontSize: 12),
-                  ),
-                ]),
-                Divider(
-                  //虚线
-                  height: 1,
-                  borderStyle: BorderStyle.dashed,
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Row(children: [
-                  Text(
-                    ' 人民币:${convertToChineseMoney(invoice.fkje.toStringAsFixed(2))}',
-                    style: TextStyle(font: ttf, fontSize: 12),
-                  ),
-                  Container(
-                      width: 320 -
-                          (calculateStringWidth(
-                              convertToChineseMoney(
-                                  invoice.fkje.toStringAsFixed(2)),
-                              12))), //计算字符串长度，以保证相对位置稳定
-                  Text(
-                    '(小写：${invoice.fkje.toStringAsFixed(2)})',
-                    style: TextStyle(font: ttf, fontSize: 12),
-                  ),
-                ]),
-                Divider(
-                  //虚线
-                  height: 1,
-                  borderStyle: BorderStyle.dashed,
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Row(children: [
-                  Text(
-                    ' 单位盖章：${c.gsnameall}',
-                    style: TextStyle(font: ttf, fontSize: 10),
-                  ),
-                ]),
-                Row(children: [
-                  SizedBox(
-                    width: 300,
-                  ),
-                  SizedBox(
-                    height: 40,
-                  ),
-                  Text(
-                    ' 交款人签字：',
-                    style: TextStyle(font: ttf, fontSize: 10),
-                  ),
-                ]),
-              ]),
-            ),
+            ]),
             Row(children: [
               Text(
                 ' 负责人:',
