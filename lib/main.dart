@@ -5,7 +5,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:hy_shouju/pages/login.dart';
 
-// void main() => runApp(GetMaterialApp(home: RunMyApp()));//s
 void main() async {
   sqfliteFfiInit();
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +38,10 @@ void main() async {
       )
     ''');
     await db.execute('''
+  INSERT INTO user (user,password, zhangtao)
+  VALUES ('admin','202cb962ac59075b964b07152d234b70', '默认账套')
+''');
+    await db.execute('''
       CREATE TABLE zt (
         id INTEGER PRIMARY KEY,
         zhangtao TEXT,
@@ -69,6 +72,18 @@ void main() async {
         value TEXT
       )
     ''');
+    await db.execute('''
+  INSERT INTO setting (name, value)
+  VALUES ('topMargin', '10')
+''');
+    await db.execute('''
+  INSERT INTO setting (name, value)
+  VALUES ('leftMargin', '50')
+''');
+    await db.execute('''
+  INSERT INTO setting (name, value)
+  VALUES ('rightMargin', '50')
+''');
   });
 
   runApp(const GetMaterialApp(home: RunMyApp()));

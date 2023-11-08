@@ -1,7 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hy_shouju/main.dart';
-import 'package:hy_shouju/pages/login.dart';
 import 'package:hy_shouju/pages/settings.dart';
 import 'package:hy_shouju/pages/zhifu_page.dart';
 import 'package:easy_sidemenu/easy_sidemenu.dart';
@@ -37,11 +37,14 @@ class _MyCustomFormState extends State<MyCustomForm> {
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
-
     super.dispose();
   }
 
-  selectChange(value) {}
+  Future<void> exitApp() async {
+    // 强制退出应用程序
+    await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+    exit(0);
+  }
 
   @override
   Widget build(context) {
@@ -204,9 +207,9 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 title: '退出',
                 onTap: (index, _) {
                   // 退出应用程序
-                  Get.off(const LoginPage());
+                  exitApp();
                 },
-                icon: Icon(Icons.exit_to_app),
+                icon: const Icon(Icons.exit_to_app),
               ),
             ],
           ),
