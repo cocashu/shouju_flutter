@@ -84,6 +84,28 @@ Future<String> queryBysjhm(int id, int zhangTao) async {
   }
 }
 
+//汇总查询数据
+Future<List<Map<String, dynamic>>> querySummaryData(
+    String bblx, DateTime? datastart, DateTime? dataend) async {
+  Database database = await openDatabaseConnection();
+  String columnName = '${bblx}_id';
+
+  String query =
+      'SELECT $columnName as id,b.$bblx as name, SUM(jine) AS jine, SUM(zf_jine) AS zfjine FROM fkmx a,$bblx b WHERE a.$columnName=b.id and 1=1';
+  List<dynamic> params = [];
+
+  if (datastart != null && dataend != null) {
+    query += ' AND uptime >= ? AND uptime <= ?';
+    params.addAll([datastart.toString(), dataend.toString()]);
+  }
+
+  query += ' GROUP BY $columnName';
+
+  List<Map<String, dynamic>> result = await database.rawQuery(query, params);
+  await database.close();
+  return result;
+}
+
 //返回指定id 的类型名称
 Future<String> queryById(int id, String tableName, String zhangTao) async {
   Database database = await openDatabaseConnection();

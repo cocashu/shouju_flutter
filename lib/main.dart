@@ -113,12 +113,13 @@ class RunMyApp extends StatelessWidget {
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: [
-        Locale('zh', 'CN'),
-        Locale('en'), // English
+        const Locale('zh'),
+        const Locale('ar'),
+        const Locale('ja'),
       ],
+      locale: const Locale('zh'),
     );
   }
 }
