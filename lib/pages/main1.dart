@@ -219,9 +219,9 @@ class _MyCustomFormState extends State<MyCustomForm> {
               children: [
                 Container(
                   color: Colors.white,
-                  child: const Center(
+                  child: Center(
                     child: Text(
-                      '开屏通知',
+                      c.gsname.toString(),
                       style: TextStyle(fontSize: 35),
                     ),
                   ),

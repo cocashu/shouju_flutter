@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:hy_shouju/main.dart';
 import 'package:hy_shouju/models/invoice.dart';
 import 'package:hy_shouju/pages/pdfexport/pdfpreview.dart';
 import 'package:hy_shouju/models/mysqlite.dart';
@@ -15,6 +17,7 @@ class InvoicePage extends StatefulWidget {
 }
 
 class _InvoicePageState extends State<InvoicePage> {
+  final Controller c = Get.put(Controller());
   List<Map<String, dynamic>> dataList = [];
   int _value = 1;
   DateTime _startDate = DateTime.now();
@@ -344,9 +347,13 @@ class _InvoicePageState extends State<InvoicePage> {
                         child: ListTile(
                           title: invoice.fkje == 0
                               ? Text(
-                                  '${invoice.fkdw}【已作废】',
+                                  '${invoice.fklx_id}-${invoice.fkdw}【已作废】',
+                                  // 设置颜色
+                                  style: const TextStyle(
+                                    color: Colors.red,
+                                  ),
                                 )
-                              : Text(invoice.fkdw),
+                              : Text('${invoice.fklx_id}-${invoice.fkdw}'),
                           //待添加文字颜色
                           subtitle: Text(invoice.fkzy),
                           trailing:
