@@ -300,6 +300,25 @@ class _InvoicePageState extends State<InvoicePage> {
                                 );
                               },
                             );
+                          } else if (direction == DismissDirection.endToStart &&
+                              data['zf_jine'] == 0.0) {
+                            // 显示"作废"和"取消"选项
+                            return await showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('无法操作'),
+                                  content: const Text('不能操作该数据'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(false),
+                                      child: const Text('确定'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
                           } else if (direction == DismissDirection.startToEnd &&
                               data['jine'] != 0.0) {
                             // 左滑操作
@@ -323,6 +342,25 @@ class _InvoicePageState extends State<InvoicePage> {
                                         fetchData();
                                       },
                                       child: const Text('作废'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          } else if (direction == DismissDirection.startToEnd &&
+                              data['jine'] == 0.0) {
+                            // 显示"作废"和"取消"选项
+                            return await showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('无法操作'),
+                                  content: const Text('不能操作该数据'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(false),
+                                      child: const Text('确定'),
                                     ),
                                   ],
                                 );
