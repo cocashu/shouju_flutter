@@ -126,15 +126,6 @@ class MybakHomePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            SizedBox(
-              width: 200,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () =>
-                    checkUserRole(context), //xuanzeupgradefile(context),
-                child: const Text('数据升级'),
-              ),
-            ),
             const SizedBox(height: 20),
             SizedBox(
               width: 200,
@@ -153,6 +144,21 @@ class MybakHomePage extends StatelessWidget {
                 child: const Text('恢复数据'),
               ),
             ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: 200,
+              height: 50,
+              child: Visibility(
+                visible: c.username == 'admin',
+                child: ElevatedButton(
+                  onPressed: () {
+                    // 按钮被点击时的操作
+                    checkUserRole(context);
+                  },
+                  child: const Text('数据升级'),
+                ),
+              ),
+            )
           ],
         ),
       ),

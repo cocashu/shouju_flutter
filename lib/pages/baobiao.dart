@@ -18,7 +18,7 @@ class _MyAppbiaobiaoPageState extends State<MyAppbiaobiaoPage> {
   List<Map<String, dynamic>> zffsdataList = [];
   List<DataGridRow> _dataGridRows = [];
   int _value = 1;
-  DateTime _startDate = DateTime.now();
+  DateTime _startDate = DateTime.now().add(const Duration(days: -1));
   DateTime _endDate = DateTime.now().add(const Duration(days: 1));
   void _onSelectedDateChanged(DateTime date) {
     if (date == null || date == _startDate) {

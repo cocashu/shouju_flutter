@@ -237,19 +237,6 @@ class _InvoicePageState extends State<InvoicePage> {
                                             ],
                                     ))))
                       ]),
-                      SizedBox(
-                        height: 50,
-                        child: TextButton(
-                          onPressed: () {
-                            // 按钮点击事件
-                            fetchseData(
-                                datastart: _startDate,
-                                dataend: _endDate
-                                    .add(const Duration(days: 1))); // 结束日期加一
-                          },
-                          child: const Text('查询-可以不用'),
-                        ),
-                      )
                     ],
                   ),
                 );

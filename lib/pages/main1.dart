@@ -134,34 +134,6 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 tooltipContent: "This is a tooltip for Dashboard item",
               ),
               SideMenuItem(
-                title: '用户管理',
-                onTap: (index, _) {
-                  sideMenu.changePage(index);
-                  titlestr.value = "鸿宇集团【 ${c.gsname}】收费专用---用户管理";
-                },
-                icon: const Icon(Icons.supervisor_account),
-              ),
-              SideMenuItem(
-                title: '数据备份',
-                onTap: (index, _) {
-                  sideMenu.changePage(index);
-                  titlestr.value = "鸿宇集团【 ${c.gsname}】收费专用---数据备份";
-                },
-                icon: const Icon(Icons.file_copy_rounded),
-                trailing: Container(
-                    decoration: const BoxDecoration(
-                        color: Colors.amber,
-                        borderRadius: BorderRadius.all(Radius.circular(6))),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6.0, vertical: 3),
-                      child: Text(
-                        'Bak',
-                        style: TextStyle(fontSize: 11, color: Colors.grey[800]),
-                      ),
-                    )),
-              ),
-              SideMenuItem(
                 title: '收据报表',
                 onTap: (index, _) {
                   sideMenu.changePage(index);
@@ -176,6 +148,14 @@ class _MyCustomFormState extends State<MyCustomForm> {
                     indent: 8,
                   );
                 },
+              ),
+              SideMenuItem(
+                title: '用户管理',
+                onTap: (index, _) {
+                  sideMenu.changePage(index);
+                  titlestr.value = "鸿宇集团【 ${c.gsname}】收费专用---用户管理";
+                },
+                icon: const Icon(Icons.supervisor_account),
               ),
               SideMenuItem(
                 title: '缴费类型管理',
@@ -204,6 +184,26 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 icon: const Icon(Icons.settings),
               ),
               SideMenuItem(
+                title: '数据备份',
+                onTap: (index, _) {
+                  sideMenu.changePage(index);
+                  titlestr.value = "鸿宇集团【 ${c.gsname}】收费专用---数据备份";
+                },
+                icon: const Icon(Icons.file_copy_rounded),
+                trailing: Container(
+                    decoration: const BoxDecoration(
+                        color: Colors.amber,
+                        borderRadius: BorderRadius.all(Radius.circular(6))),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6.0, vertical: 3),
+                      child: Text(
+                        'Bak',
+                        style: TextStyle(fontSize: 11, color: Colors.grey[800]),
+                      ),
+                    )),
+              ),
+              SideMenuItem(
                 title: '退出',
                 onTap: (index, _) {
                   // 退出应用程序
@@ -230,14 +230,6 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 Container(color: Colors.white, child: InvoicePage()),
                 Container(
                   color: Colors.white,
-                  child: const user_TypeManagementPage(),
-                ),
-                Container(
-                  color: Colors.white,
-                  child: MybakHomePage(),
-                ),
-                Container(
-                  color: Colors.white,
                   child: const MyAppbiaobiaoPage(),
                 ),
                 Container(
@@ -248,6 +240,10 @@ class _MyCustomFormState extends State<MyCustomForm> {
                       style: TextStyle(fontSize: 35),
                     ),
                   ),
+                ),
+                Container(
+                  color: Colors.white,
+                  child: const user_TypeManagementPage(),
                 ),
                 Container(
                   color: Colors.white,
@@ -264,6 +260,10 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 Container(
                   color: Colors.white,
                   child: Center(child: MarginSettingsPage()),
+                ),
+                Container(
+                  color: Colors.white,
+                  child: MybakHomePage(),
                 ),
                 Container(
                   color: Colors.white,
