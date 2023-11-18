@@ -121,7 +121,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                   titlestr.value = "鸿宇集团【 ${c.gsname}】收费专用---开具收据";
                   // Get.to(shouju_page());
                 },
-                icon: const Icon(Icons.home),
+                icon: const Icon(Icons.add_circle_outline),
                 tooltipContent: "This is a tooltip for Dashboard item",
               ),
               SideMenuItem(
@@ -164,7 +164,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                   titlestr.value = "鸿宇集团【 ${c.gsname}】收费专用---缴费类型管理";
                   // Get.to(TypeManagementPage());
                 },
-                icon: const Icon(Icons.settings),
+                icon: const Icon(Icons.build),
               ),
               SideMenuItem(
                 title: '支付方式管理',
@@ -173,7 +173,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                   titlestr.value = "鸿宇集团【 ${c.gsname}】收费专用--支付方式管理";
                   // Get.to(zffs_TypeManagementPage());
                 },
-                icon: const Icon(Icons.settings),
+                icon: const Icon(Icons.payments),
               ),
               SideMenuItem(
                 title: '软件设置',
